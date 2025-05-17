@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser'
 
 // Import routes
 import authRoutes from './routes/auth.routes.js';
@@ -17,9 +18,14 @@ dotenv.config();
 const app = express();
 
 // Middlewares
-app.use(cors());
+
 app.use(morgan('dev'));
-app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:5173',  // o tu dominio frontend
+  credentials: true                 // permite envíar cookies
+}))
+app.use(cookieParser())
+app.use(express.json())
 
 // Connect to DB
 db();

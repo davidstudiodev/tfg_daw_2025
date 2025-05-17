@@ -2,6 +2,10 @@
   <div class="profile-container">
     <h1>Editar perfil de Developer</h1>
 
+    <!-- Notificaciones -->
+    <p v-if="success" class="success">{{ success }}</p>
+    <p v-if="error"   class="error">{{ error }}</p>
+
     <!-- Estado de carga -->
     <div v-if="loading">Cargando perfil…</div>
 
@@ -32,78 +36,86 @@
         />
       </label>
 
-      <button type="submit">Guardar cambios</button>
-      <p v-if="error" class="error">{{ error }}</p>
-      <p v-if="success" class="success">{{ success }}</p>
+      <button type="submit" :disabled="saving">
+        {{ saving ? 'Guardando…' : 'Guardar cambios' }}
+      </button>
     </form>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { useRouter }    from 'vue-router'
 
-// 1. Configurar cabecera con token
-const token = localStorage.getItem('token')
-if (token) axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+// 1) Importar los servicios de perfil
+import {
+  getDevProfile,
+  updateDevProfile
+} from '../services/profile.js'
 
 const router = useRouter()
 const loading = ref(true)
-const error = ref('')
+const saving  = ref(false)
+const error   = ref('')
 const success = ref('')
 
-// 2. Formulario reactivo
+// 2) Estado del formulario
 const form = ref({
-  description: '',
+  description:     '',
   years_experience: 0,
-  location: '',
-  tech_stack: []
+  location:         '',
+  tech_stack:      []
 })
-
-// Helper para mostrar/parsear JSON en textarea
 const techJson = ref('[]')
 
-// 3. Obtener perfil al montar
+// 3) Cargar perfil al montar
 async function loadProfile() {
+  loading.value = true
+  error.value   = ''
   try {
-    const res = await axios.get('/api/dev/profile')
-    const data = res.data
-    form.value.description = data.description
-    form.value.years_experience = data.years_experience
-    form.value.location = data.location
-    form.value.tech_stack = data.tech_stack
+    const { data } = await getDevProfile()
+    // Rellenar el form con la respuesta
+    form.value     = {
+      description:      data.description,
+      years_experience: data.years_experience,
+      location:         data.location,
+      tech_stack:       data.tech_stack
+    }
     techJson.value = JSON.stringify(data.tech_stack, null, 2)
-  } catch (err) {
-    error.value = 'No se pudo cargar el perfil. Por favor, vuelve a iniciar sesión.'
+  } catch {
+    error.value = 'No se pudo cargar el perfil. Inicia sesión de nuevo.'
   } finally {
     loading.value = false
   }
 }
 
-// 4. Enviar cambios
+// 4) Guardar cambios
 async function saveProfile() {
-  error.value = ''
+  error.value   = ''
   success.value = ''
-  let parsedTech
-
+  let parsed
   try {
-    parsedTech = JSON.parse(techJson.value)
+    parsed = JSON.parse(techJson.value)
   } catch {
     error.value = 'El JSON de tecnologías no es válido.'
     return
   }
 
+  saving.value = true
   try {
-    await axios.put('/api/dev/profile', {
-      description: form.value.description,
+    await updateDevProfile({
+      description:      form.value.description,
       years_experience: form.value.years_experience,
-      location: form.value.location,
-      tech_stack: parsedTech
+      location:         form.value.location,
+      tech_stack:       parsed
     })
     success.value = 'Perfil actualizado correctamente.'
-  } catch (err) {
-    error.value = err.response?.data?.message || 'Error al guardar el perfil.'
+  } catch {
+    error.value = 'Error al guardar el perfil. Intenta más tarde.'
+  } finally {
+    saving.value = false
+    // Opcional: refrescar datos
+    loadProfile()
   }
 }
 
@@ -114,6 +126,9 @@ onMounted(loadProfile)
 .profile-container {
   max-width: 600px;
   margin: 2rem auto;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
 }
 .profile-form {
   display: flex;
@@ -126,19 +141,21 @@ onMounted(loadProfile)
   font-weight: bold;
 }
 .profile-form input,
-.profile-form textarea {
+.profile-form textarea,
+.profile-form button {
   padding: 0.5rem;
   font-size: 1rem;
 }
-.profile-form button {
-  width: 150px;
-  padding: 0.5rem;
-  cursor: pointer;
+.profile-form button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .error {
   color: #c00;
+  margin-bottom: 1rem;
 }
 .success {
   color: #060;
+  margin-bottom: 1rem;
 }
 </style>
