@@ -1,6 +1,7 @@
 <template>
   <div class="auth-container">
     <h2>Login de {{ roleLabel }}</h2>
+
     <form @submit.prevent="submitForm" class="auth-form">
       <input
         v-model="form.email"
@@ -14,71 +15,72 @@
         placeholder="Contraseña"
         required
       />
-      <button type="submit">Entrar</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Validando…' : 'Entrar' }}
+      </button>
       <p v-if="error" class="error">{{ error }}</p>
     </form>
+
+    <p>
+      No tienes cuenta?
+      <router-link :to="{ name: 'register', query: { role } }">
+        Registrarse
+      </router-link>
+    </p>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
 
-// 1. Base URL desde .env
-axios.defaults.baseURL = import.meta.env.VITE_API_URL
+// 1) Importamos los servicios en lugar de axios directamente
+import { login, getMe } from '../services/auth.js'
 
-// 2. Leer rol del query ?role=company|dev
 const route = useRoute()
 const router = useRouter()
+
+// 2) Obtenemos el role del query
 const role = ref(route.query.role === 'company' ? 'company' : 'dev')
 const roleLabel = computed(() =>
   role.value === 'company' ? 'Empresa' : 'Developer'
 )
 
-// 3. Formulario y manejo de errores
+// 3) Estado del formulario y notificaciones
 const form = ref({ email: '', password: '' })
+const loading = ref(false)
 const error = ref('')
 
-// Función para decodificar el JWT sin librerías
-function decodeToken(token) {
-  try {
-    const base64Payload = token.split('.')[1]
-    const jsonPayload = atob(base64Payload)
-    return JSON.parse(jsonPayload)
-  } catch {
-    return null
-  }
-}
-
-// 4. Envío de formulario
 const submitForm = async () => {
+  loading.value = true
   error.value = ''
+
   try {
-    const res = await axios.post('/api/auth/login', {
-      email: form.value.email,
-      password: form.value.password
-    })
+    // 4) Hacemos login; el backend envía la cookie HttpOnly automáticamente
+    await login({ email: form.value.email, password: form.value.password })
 
-    const token = res.data.token
-    // 5. Decodifica y valida que el rol coincida
-    const decoded = decodeToken(token)
-    if (!decoded || decoded.role !== role.value) {
-      error.value = `Usuario registrado como "${decoded?.role}", no coincide con la interfaz seleccionada.`
-      return
-    }
+    // 5) Consultamos /api/auth/me para obtener { id, email, role }
+    const { data: user } = await getMe()
 
-    // 6. Guarda el token y redirige según rol
-    localStorage.setItem('token', token)
+    // 6) Redirigimos según el role que venga del servidor
     const destination =
-      role.value === 'company'
-        ? '/company/profile'
-        : '/dev/profile'
+      user.role === 'company'
+        ? { name: 'company-profile' }
+        : { name: 'dev-profile' }
     router.push(destination)
+
   } catch (err) {
+    // 7) Mensaje de error según status
+    const status = err.response?.status
     error.value =
-      err.response?.data?.message ||
-      'Error al iniciar sesión. Por favor, revisa tus datos.'
+      status === 400
+        ? 'Credenciales incorrectas.'
+        : 'Error al iniciar sesión. Intenta más tarde.'
+  } finally {
+    loading.value = false
+    // 8) Limpiamos el formulario
+    form.value.email = ''
+    form.value.password = ''
   }
 }
 </script>
@@ -104,6 +106,10 @@ const submitForm = async () => {
   padding: 0.75rem;
   font-size: 1rem;
   cursor: pointer;
+}
+.auth-form button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .error {
   color: #c00;

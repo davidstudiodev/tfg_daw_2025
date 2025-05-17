@@ -20,55 +20,69 @@
         placeholder="Contraseña"
         required
       />
-      <button type="submit">Registrarse</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Registrando…' : 'Registrarse' }}
+      </button>
       <p v-if="error" class="error">{{ error }}</p>
     </form>
+    <p>
+      Ya tienes cuenta?
+      <router-link :to="{ name: 'login', query: { role } }">
+        Iniciar sesión
+      </router-link>
+    </p>
   </div>
 </template>
 
 <script setup>
+// 1) Quitar: import axios y configuración de baseURL
+// import axios from 'axios'
+// axios.defaults.baseURL = import.meta.env.VITE_API_URL
+
+// 2) Importar solo lo que necesitamos de los servicios
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { register as registerUser } from '../services/auth.js'  // << importa tu service
 
-// 1. Configura la URL base de la API desde .env
-axios.defaults.baseURL = import.meta.env.VITE_API_URL
-
-// 2. Obtén el rol desde el query param (?role=company o ?role=dev)
 const route = useRoute()
 const router = useRouter()
+
+// 3) Leer rol del query param
 const role = ref(route.query.role === 'company' ? 'company' : 'dev')
 const roleLabel = computed(() =>
   role.value === 'company' ? 'Empresa' : 'Developer'
 )
 
-// 3. Datos del formulario y manejo de errores
-const form = ref({
-  name: '',
-  email: '',
-  password: ''
-})
+// 4) Estado del formulario, loading y error
+const form = ref({ name: '', email: '', password: '' })
+const loading = ref(false)
 const error = ref('')
 
-// 4. Envío de formulario
 const submitForm = async () => {
+  loading.value = true
   error.value = ''
+
   try {
-    await axios.post('/api/auth/register', {
+    // 5) Llamada al service en lugar de axios directamente
+    await registerUser({
       name: form.value.name,
       email: form.value.email,
       password: form.value.password,
       role: role.value
     })
-    // 5. Redirige al login manteniendo el mismo rol
-    router.push({
-      path: '/login',
-      query: { role: role.value }
-    })
+
+    // 6) Redirigir tras registro correcto
+    router.push({ name: 'login', query: { role: role.value } })
+
   } catch (err) {
+    // 7) Mostrar mensaje de error real
     error.value =
       err.response?.data?.message ||
       'Ha ocurrido un error al registrar. Intenta de nuevo.'
+  } finally {
+    // 8) Reset de estado y formulario
+    loading.value = false
+    form.value = { name: '', email: '', password: '' }
   }
 }
 </script>
@@ -94,6 +108,10 @@ const submitForm = async () => {
   padding: 0.75rem;
   font-size: 1rem;
   cursor: pointer;
+}
+.auth-form button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .error {
   color: #c00;
