@@ -3,12 +3,17 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+
+// Import routes
 import authRoutes from './routes/auth.routes.js';
 import protectedRoutes from './routes/protected.routes.js';
+import devRoutes from './routes/dev.routes.js'
+import companyRoutes from './routes/company.routes.js'
+
+// Import DB connection
 import db from './config/db.js';
 
 dotenv.config();
-
 const app = express();
 
 // Middlewares
@@ -22,6 +27,8 @@ db();
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
+app.use('/api/dev', devRoutes)
+app.use('/api/company', companyRoutes)
 
 // 404 handler
 app.use((req, res) => {

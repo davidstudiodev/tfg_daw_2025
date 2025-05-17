@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { pool } from '../config/db.js';
 import { createUser, findUserByEmail } from '../models/User.js';
 
 export const register = async (req, res) => {
@@ -10,6 +11,21 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = await createUser({ name, email, password: hashedPassword, role });
+
+    // Crear perfil en developers o companies según el rol
+    if (role === 'dev') {
+      await pool.query(
+        `INSERT INTO developers (user_id, description, years_experience, location, tech_stack)
+         VALUES (?, '', 0, '', '[]')`,
+        [userId]
+      );
+    } else if (role === 'company') {
+      await pool.query(
+        `INSERT INTO companies (user_id, description, location)
+         VALUES (?, '', '')`,
+        [userId]
+      );
+    }
 
     res.status(201).json({ message: 'User created', userId });
   } catch (error) {

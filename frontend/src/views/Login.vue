@@ -72,8 +72,8 @@ const submitForm = async () => {
     localStorage.setItem('token', token)
     const destination =
       role.value === 'company'
-        ? '/company/dashboard'
-        : '/dev/dashboard'
+        ? '/company/profile'
+        : '/dev/profile'
     router.push(destination)
   } catch (err) {
     error.value =
