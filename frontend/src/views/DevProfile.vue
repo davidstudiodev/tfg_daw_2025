@@ -26,28 +26,30 @@
         <input type="text" v-model="form.location" required />
       </label>
 
-      <label>
-        Tecnologías (JSON)
-        <textarea
-          v-model="techJson"
-          rows="4"
-          placeholder='e.g. [{"category":"frontend","items":["Vue","React"]}]'
-          required
-        />
-      </label>
+      <!-- Selección de tecnologías -->
+      <div v-for="section in techOptions" :key="section.category" class="tech-section">
+        <h3>{{ section.category }}</h3>
+        <div class="tech-buttons">
+          <button
+            v-for="item in section.items"
+            :key="item"
+            type="button"
+            :class="{ selected: selected.includes(item) }"
+            @click="toggleTech(item)"
+          >
+            {{ item }}
+          </button>
+        </div>
+      </div>
 
       <button type="submit" :disabled="saving">
         {{ saving ? 'Guardando…' : 'Guardar cambios' }}
       </button>
-      <button @click="handleLogout" class="logout-btn">
+      <button @click="handleLogout" type="button" class="logout-btn">
         Cerrar sesión
       </button>
-
     </form>
   </div>
-
-
-
 </template>
 
 <script setup>
@@ -55,11 +57,12 @@ import { ref, onMounted } from 'vue'
 import { useRouter }    from 'vue-router'
 import { logout } from '../services/auth.js'
 
-// 1) Importar los servicios de perfil
+// 1) Importar servicios de perfil y constantes de tecnologías
 import {
   getDevProfile,
   updateDevProfile
 } from '../services/profile.js'
+import { techOptions } from '../constants/techOptions.js'
 
 const router = useRouter()
 const loading = ref(true)
@@ -67,14 +70,14 @@ const saving  = ref(false)
 const error   = ref('')
 const success = ref('')
 
-// 2) Estado del formulario
+// 2) Estado del formulario y selección de tecnologías
 const form = ref({
-  description:     '',
+  description:      '',
   years_experience: 0,
   location:         '',
-  tech_stack:      []
+  tech_stack:       []
 })
-const techJson = ref('[]')
+const selected = ref([])
 
 // 3) Cargar perfil al montar
 async function loadProfile() {
@@ -82,14 +85,16 @@ async function loadProfile() {
   error.value   = ''
   try {
     const { data } = await getDevProfile()
-    // Rellenar el form con la respuesta
-    form.value     = {
+    form.value = {
       description:      data.description,
       years_experience: data.years_experience,
       location:         data.location,
       tech_stack:       data.tech_stack
     }
-    techJson.value = JSON.stringify(data.tech_stack, null, 2)
+    // Inicializar selección
+    selected.value = Array.isArray(data.tech_stack)
+      ? data.tech_stack.flatMap(section => section.items)
+      : []
   } catch {
     error.value = 'No se pudo cargar el perfil. Inicia sesión de nuevo.'
   } finally {
@@ -97,17 +102,25 @@ async function loadProfile() {
   }
 }
 
-// 4) Guardar cambios
+// 4) Función para alternar selección
+function toggleTech(item) {
+  if (selected.value.includes(item)) {
+    selected.value = selected.value.filter(i => i !== item)
+  } else {
+    selected.value.push(item)
+  }
+}
+
+// 5) Guardar cambios
 async function saveProfile() {
   error.value   = ''
   success.value = ''
-  let parsed
-  try {
-    parsed = JSON.parse(techJson.value)
-  } catch {
-    error.value = 'El JSON de tecnologías no es válido.'
-    return
-  }
+
+  // Reconstruir tech_stack por secciones
+  const tech_stack = techOptions.map(section => ({
+    category: section.category,
+    items: section.items.filter(item => selected.value.includes(item))
+  }))
 
   saving.value = true
   try {
@@ -115,25 +128,25 @@ async function saveProfile() {
       description:      form.value.description,
       years_experience: form.value.years_experience,
       location:         form.value.location,
-      tech_stack:       parsed
+      tech_stack       
+    : tech_stack
     })
     success.value = 'Perfil actualizado correctamente.'
   } catch {
     error.value = 'Error al guardar el perfil. Intenta más tarde.'
   } finally {
     saving.value = false
-    // Opcional: refrescar datos
     loadProfile()
   }
 }
 
-// 5) Función para manejar el logout y redirigir al login
+// 6) Logout
 async function handleLogout() {
   try {
     await logout()
     router.push({ name: 'login', query: { role: 'dev' } })
   } catch {
-    // opcional: muestra un error
+    // opcional: manejar error
   }
 }
 
@@ -175,5 +188,37 @@ onMounted(loadProfile)
 .success {
   color: #060;
   margin-bottom: 1rem;
+}
+.tech-section {
+  margin-bottom: 1rem;
+}
+.tech-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.tech-buttons button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+.tech-buttons button.selected {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+.logout-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+.logout-btn:hover {
+  background: #d32f2f;
 }
 </style>
