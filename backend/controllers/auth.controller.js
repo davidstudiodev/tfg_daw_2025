@@ -75,3 +75,15 @@ export const me = (req, res) => {
     role: req.user.role
   });
 };
+
+// Borra la cookie del token
+export const logout = (req, res) => {
+  res
+    .clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    })
+    .status(200)
+    .json({ message: 'Logged out' });
+};

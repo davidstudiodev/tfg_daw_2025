@@ -24,6 +24,11 @@
       <button type="submit" :disabled="saving">
         {{ saving ? 'Guardando…' : 'Guardar cambios' }}
       </button>
+
+      <button @click="handleLogout" class="logout-btn">
+        Cerrar sesión
+      </button>
+
     </form>
   </div>
 </template>
@@ -32,6 +37,7 @@
 // 1) Importar los refs y el router
 import { ref, onMounted } from 'vue'
 import { useRouter }    from 'vue-router'
+import { logout } from '../services/auth.js'
 
 // 2) Importar los servicios de perfil de empresa
 import {
@@ -95,6 +101,16 @@ async function saveProfile() {
     clearMessages()
   } finally {
     saving.value = false
+  }
+}
+
+// 7) Función para manejar el logout y redirigir al login
+async function handleLogout() {
+  try {
+    await logout()
+    router.push({ name: 'login', query: { role: 'company' } })
+  } catch {
+    // opcional: muestra un error
   }
 }
 
