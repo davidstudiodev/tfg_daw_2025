@@ -25,7 +25,9 @@ app.use(cors({
   credentials: true                 // permite envíar cookies
 }))
 app.use(cookieParser())
-app.use(express.json())
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
+
 
 // Connect to DB
 db();

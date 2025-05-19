@@ -5,8 +5,10 @@ export const getDeveloperProfile = async (req, res) => {
   const userId = req.user.id;
   try {
     const [rows] = await pool.query(
-      `SELECT u.id, u.name, u.email, d.description,
-              d.years_experience, d.location, d.tech_stack
+      `SELECT u.id, u.name, u.email,
+              d.profession, d.phone,
+              d.description, d.years_experience, d.location,
+              d.tech_stack, d.avatar
        FROM users u
        JOIN developers d ON d.user_id = u.id
        WHERE u.id = ?`,
@@ -18,14 +20,21 @@ export const getDeveloperProfile = async (req, res) => {
 
     const profile = rows[0];
 
+    // ![DEBUG] Log the profile before parsing
+    console.log('Perfil dev antes de parsear:', profile);
+
     // Parse tech_stack safely, default to empty array
-    let techStack;
-    try {
-      techStack = JSON.parse(profile.tech_stack);
-    } catch {
-      techStack = [];
+    if (typeof profile.tech_stack === 'string') {
+      try {
+        profile.tech_stack = JSON.parse(profile.tech_stack);
+      } catch {
+        profile.tech_stack = [];
+      }
     }
-    profile.tech_stack = techStack;
+    if (!Array.isArray(profile.tech_stack)) {
+      profile.tech_stack = [];
+    }
+    profile.avatar = profile.avatar || '';
 
     res.json(profile);
   } catch (error) {
@@ -36,13 +45,28 @@ export const getDeveloperProfile = async (req, res) => {
 
 export const updateDeveloperProfile = async (req, res) => {
   const userId = req.user.id;
-  const { description, years_experience, location, tech_stack } = req.body;
+  const { profession, phone, description, years_experience, location, tech_stack, avatar } = req.body;
   try {
     await pool.query(
       `UPDATE developers
-       SET description = ?, years_experience = ?, location = ?, tech_stack = ?
+       SET profession      = ?,
+           phone           = ?,
+           description     = ?,
+           years_experience= ?,
+           location        = ?,
+           tech_stack      = ?,
+           avatar          = ?
        WHERE user_id = ?`,
-      [description, years_experience, location, JSON.stringify(tech_stack), userId]
+      [
+        profession,
+        phone,
+       description,
+        years_experience,
+        location,
+        JSON.stringify(tech_stack),
+        avatar || '',
+        userId
+      ]
     );
     res.json({ message: 'Developer profile updated' });
   } catch (error) {

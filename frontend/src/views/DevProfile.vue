@@ -1,39 +1,130 @@
 <template>
   <div class="profile-container">
-    <h1>Editar perfil de Developer</h1>
+    <h1>Perfil de Developer</h1>
 
     <!-- Notificaciones -->
     <p v-if="success" class="success">{{ success }}</p>
-    <p v-if="error"   class="error">{{ error }}</p>
+    <p v-if="error" class="error">{{ error }}</p>
 
     <!-- Estado de carga -->
     <div v-if="loading">Cargando perfil…</div>
 
-    <!-- Formulario -->
+    <!-- Resumen de perfil -->
+    <section v-else-if="!isEditing" class="profile-summary">
+      <img
+        v-if="form.avatar"
+        :src="form.avatar"
+        alt="Avatar"
+        class="avatar-preview"
+      />
+      <p><strong>Nombre:</strong> {{ form.name }}</p>
+      <p><strong>Correo:</strong> {{ form.email }}</p>
+      <p><strong>Profesión:</strong> {{ form.profession || 'N/D' }}</p>
+      <p><strong>Teléfono:</strong> {{ form.phone || 'N/D' }}</p>
+      <p><strong>Biografía:</strong> {{ form.description }}</p>
+      <p><strong>Años experiencia:</strong> {{ form.years_experience }}</p>
+      <p><strong>Ubicación:</strong> {{ form.location }}</p>
+      <p>
+        <strong>Tecnologías:</strong>
+        {{ allTech.length > 0 ? allTech.join(', ') : 'Ninguna' }}
+      </p>
+
+      <div class="actions">
+        <button type="button" @click="startEditing" class="edit-btn">
+          Editar datos
+        </button>
+        <button type="button" @click="handlePublish" class="publish-btn">
+          Publicar perfil
+        </button>
+        <button type="button" @click="handleLogout" class="logout-btn">
+          Cerrar sesión
+        </button>
+      </div>
+    </section>
+
+    <!-- Formulario de edición -->
     <form v-else @submit.prevent="saveProfile" class="profile-form">
       <label>
-        Descripción
-        <textarea v-model="form.description" rows="3" required />
+        Avatar
+        <input
+          type="file"
+          accept="image/*"
+          @change="handleAvatarChange"
+          :disabled="!isEditing"
+        />
+        <small class="note">Máximo 1 MB, formato JPG/PNG</small>
+      </label>
+      <img
+        v-if="form.avatar"
+        :src="form.avatar"
+        alt="Vista previa"
+        class="avatar-preview"
+      />
+
+      <label>
+        Profesión
+        <input
+          type="text"
+          v-model="form.profession"
+          :disabled="!isEditing"
+          required
+        />
+      </label>
+
+      <label>
+        Teléfono
+        <input
+          type="tel"
+          v-model="form.phone"
+          :disabled="!isEditing"
+          required
+        />
+      </label>
+
+      <label>
+        Biografía
+        <textarea
+          v-model="form.description"
+          rows="3"
+          :disabled="!isEditing"
+          required
+        ></textarea>
       </label>
 
       <label>
         Años de experiencia
-        <input type="number" v-model.number="form.years_experience" min="0" required />
+        <input
+          type="number"
+          v-model.number="form.years_experience"
+          min="0"
+          :disabled="!isEditing"
+          required
+        />
       </label>
 
       <label>
         Ubicación (ciudad)
-        <input type="text" v-model="form.location" required />
+        <input
+          type="text"
+          v-model="form.location"
+          :disabled="!isEditing"
+          required
+        />
       </label>
 
       <!-- Selección de tecnologías -->
-      <div v-for="section in techOptions" :key="section.category" class="tech-section">
+      <div
+        v-for="section in techOptions"
+        :key="section.category"
+        class="tech-section"
+      >
         <h3>{{ section.category }}</h3>
         <div class="tech-buttons">
           <button
             v-for="item in section.items"
             :key="item"
             type="button"
+            :disabled="!isEditing"
             :class="{ selected: selected.includes(item) }"
             @click="toggleTech(item)"
           >
@@ -42,10 +133,30 @@
         </div>
       </div>
 
-      <button type="submit" :disabled="saving">
-        {{ saving ? 'Guardando…' : 'Guardar cambios' }}
-      </button>
-      <button @click="handleLogout" type="button" class="logout-btn">
+      <!-- Botones de acciones -->
+      <div class="actions">
+        <button
+          type="submit"
+          :disabled="saving || !isEditing"
+          class="save-btn"
+        >
+          {{ saving ? 'Guardando…' : 'Guardar datos' }}
+        </button>
+        <button
+          type="button"
+          @click="handlePublish"
+          :disabled="!isEditing"
+          class="publish-btn"
+        >
+          Publicar perfil
+        </button>
+      </div>
+
+      <button
+        type="button"
+        @click="handleLogout"
+        class="logout-btn"
+      >
         Cerrar sesión
       </button>
     </form>
@@ -53,107 +164,159 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter }    from 'vue-router'
-import { logout } from '../services/auth.js'
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { logout } from '../services/auth.js';
+import { getDevProfile, updateDevProfile } from '../services/profile.js';
+import { techOptions } from '../constants/techOptions.js';
 
-// 1) Importar servicios de perfil y constantes de tecnologías
-import {
-  getDevProfile,
-  updateDevProfile
-} from '../services/profile.js'
-import { techOptions } from '../constants/techOptions.js'
+const router = useRouter();
+const loading = ref(true);
+const saving = ref(false);
+const error = ref('');
+const success = ref('');
+const isEditing = ref(false);
 
-const router = useRouter()
-const loading = ref(true)
-const saving  = ref(false)
-const error   = ref('')
-const success = ref('')
-
-// 2) Estado del formulario y selección de tecnologías
+// Reactive form data
 const form = ref({
-  description:      '',
+  name: '',
+  email: '',
+  profession: '',
+  phone: '',
+  description: '',
   years_experience: 0,
-  location:         '',
-  tech_stack:       []
-})
-const selected = ref([])
+  location: '',
+  tech_stack: [],
+  avatar: ''
+});
 
-// 3) Cargar perfil al montar
+// Selected tech items
+const selected = ref([]);
+
+// Computed from form.tech_stack to display
+const allTech = computed(() =>
+  Array.isArray(form.value.tech_stack)
+    ? form.value.tech_stack
+        .filter(sec => Array.isArray(sec.items) && sec.items.length > 0)
+        .flatMap(sec => sec.items)
+    : []
+);
+
 async function loadProfile() {
-  loading.value = true
-  error.value   = ''
+  loading.value = true;
   try {
-    const { data } = await getDevProfile()
-    form.value = {
-      description:      data.description,
-      years_experience: data.years_experience,
-      location:         data.location,
-      tech_stack:       data.tech_stack
+    const { data } = await getDevProfile();
+    let tech_stack = data.tech_stack;
+    console.log('Respuesta del backend:', data); // <-- LOG 1
+
+    if (typeof tech_stack === 'string') {
+      try {
+        tech_stack = JSON.parse(tech_stack);
+        console.log('tech_stack parseado:', tech_stack); // <-- LOG 2
+      } catch {
+        tech_stack = [];
+        console.log('tech_stack no se pudo parsear, se deja como []'); // <-- LOG 3
+      }
     }
-    // Inicializar selección
-    selected.value = Array.isArray(data.tech_stack)
-      ? data.tech_stack.flatMap(section => section.items)
-      : []
-  } catch {
-    error.value = 'No se pudo cargar el perfil. Inicia sesión de nuevo.'
+    if (!Array.isArray(tech_stack)) {
+      console.log('tech_stack NO es array, se deja como []'); // <-- LOG 4
+      tech_stack = [];
+    }
+
+    form.value = {
+      name: data.name,
+      email: data.email,
+      profession: data.profession || '',
+      phone: data.phone || '',
+      description: data.description,
+      years_experience: data.years_experience,
+      location: data.location,
+      tech_stack,
+      avatar: data.avatar || ''
+    };
+    console.log('form.value.tech_stack final:', form.value.tech_stack); // <-- LOG 5
+
+    selected.value = Array.isArray(tech_stack)
+      ? tech_stack.flatMap(sec => sec.items)
+      : [];
+    console.log('selected.value:', selected.value); // <-- LOG 6
+  } catch (e) {
+    console.log('Error en loadProfile:', e); // <-- LOG 7
+    isEditing.value = true;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-// 4) Función para alternar selección
+function handleAvatarChange(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const MAX_SIZE = 1024 * 1024; // 1MB
+  if (file.size > MAX_SIZE) {
+    error.value = 'La imagen supera 1 MB.';
+    return;
+  }
+  error.value = '';
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    form.value.avatar = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function startEditing() {
+  isEditing.value = true;
+}
+
 function toggleTech(item) {
-  if (selected.value.includes(item)) {
-    selected.value = selected.value.filter(i => i !== item)
-  } else {
-    selected.value.push(item)
-  }
+  if (!isEditing.value) return;
+  const idx = selected.value.indexOf(item);
+  if (idx > -1) selected.value.splice(idx, 1);
+  else selected.value.push(item);
 }
 
-// 5) Guardar cambios
 async function saveProfile() {
-  error.value   = ''
-  success.value = ''
-
-  // Reconstruir tech_stack por secciones
-  const tech_stack = techOptions.map(section => ({
-    category: section.category,
-    items: section.items.filter(item => selected.value.includes(item))
-  }))
-
-  saving.value = true
+  error.value = '';
+  saving.value = true;
+  const tech_stack = techOptions.map(sec => ({
+    category: sec.category,
+    items: sec.items.filter(i => selected.value.includes(i))
+  }));
   try {
-    await updateDevProfile({
-      description:      form.value.description,
-      years_experience: form.value.years_experience,
-      location:         form.value.location,
-      tech_stack       
-    : tech_stack
-    })
-    success.value = 'Perfil actualizado correctamente.'
+    await updateDevProfile({ ...form.value, tech_stack });
+    form.value.tech_stack = tech_stack;
+    success.value = 'Datos guardados correctamente.';
+    isEditing.value = false;
   } catch {
-    error.value = 'Error al guardar el perfil. Intenta más tarde.'
+    error.value = 'Error al guardar datos.';
   } finally {
-    saving.value = false
-    loadProfile()
+    saving.value = false;
   }
 }
 
-// 6) Logout
+async function handlePublish() {
+  await saveProfile();
+  router.push({ path: '/developers' });
+}
+
 async function handleLogout() {
-  try {
-    await logout()
-    router.push({ name: 'login', query: { role: 'dev' } })
-  } catch {
-    // opcional: manejar error
-  }
+  await logout();
+  router.push({ name: 'login', query: { role: 'dev' } });
 }
 
-onMounted(loadProfile)
+onMounted(loadProfile);
 </script>
 
 <style scoped>
+.avatar-preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
 .profile-container {
   max-width: 600px;
   margin: 2rem auto;
@@ -161,36 +324,38 @@ onMounted(loadProfile)
   border: 1px solid #ddd;
   border-radius: 8px;
 }
+.profile-summary,
 .profile-form {
+  margin-bottom: 1rem;
+}
+.actions {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
-.profile-form label {
-  display: flex;
-  flex-direction: column;
-  font-weight: bold;
+.edit-btn {
+  background: #1976d2;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
-.profile-form input,
-.profile-form textarea,
-.profile-form button {
-  padding: 0.5rem;
-  font-size: 1rem;
+.publish-btn {
+  background: #43a047;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
-.profile-form button[disabled] {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.error {
-  color: #c00;
-  margin-bottom: 1rem;
-}
-.success {
-  color: #060;
-  margin-bottom: 1rem;
-}
-.tech-section {
-  margin-bottom: 1rem;
+.logout-btn {
+  background: #f44336;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 .tech-buttons {
   display: flex;
@@ -205,20 +370,25 @@ onMounted(loadProfile)
   cursor: pointer;
 }
 .tech-buttons button.selected {
-  background-color: #007bff;
-  color: white;
+  background: #007bff;
+  color: #fff;
   border-color: #0056b3;
 }
-.logout-btn {
-  background: #f44336;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  border-radius: 4px;
-  margin-top: 0.5rem;
+.error {
+  color: #c00;
+  margin: 1rem 0;
 }
-.logout-btn:hover {
-  background: #d32f2f;
+.success {
+  color: #060;
+  margin: 1rem 0;
+}
+.profile-form input,
+.profile-form textarea {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+.profile-form button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
