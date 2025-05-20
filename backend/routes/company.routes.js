@@ -5,7 +5,9 @@ import {
   getCompanyProfile,
   updateCompanyProfile,
   createJob,
-  listJobsByCompany
+  getCompanyJobs,
+  updateJob,
+  deleteJob
 } from '../controllers/company.controller.js'
 
 const router = express.Router()
@@ -16,6 +18,8 @@ router.put('/profile', authMiddleware, updateCompanyProfile)
 
 // Gestión de ofertas
 router.post('/jobs', authMiddleware, createJob)
-router.get('/jobs', authMiddleware, listJobsByCompany)
+router.get('/jobs', authMiddleware, getCompanyJobs)
+router.put('/jobs/:id', authMiddleware, updateJob)
+router.delete('/jobs/:id', authMiddleware, deleteJob)
 
 export default router
