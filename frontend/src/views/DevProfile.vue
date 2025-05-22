@@ -278,6 +278,7 @@ function toggleTech(item) {
 }
 
 async function saveProfile() {
+  if (error.value) return;
   error.value = '';
   saving.value = true;
   const tech_stack = techOptions.map(sec => ({
@@ -287,7 +288,7 @@ async function saveProfile() {
   try {
     await updateDevProfile({ ...form.value, tech_stack });
     form.value.tech_stack = tech_stack;
-    success.value = 'Datos guardados correctamente.';
+    alert('Perfil actualizado correctamente.');
     isEditing.value = false;
   } catch {
     error.value = 'Error al guardar datos.';

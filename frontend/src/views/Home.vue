@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <header class="header">
-      <div class="logo">jobsxdevs</div>
+      <AppLogo />
 
       <div class="toggle-container">
         <label>
@@ -32,6 +32,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import AppLogo from '../components/AppLogo.vue'
 
 const isCompany = ref(false);
 const router = useRouter();

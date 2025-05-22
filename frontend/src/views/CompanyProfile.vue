@@ -3,7 +3,6 @@
     <h1>Perfil de Empresa</h1>
 
     <!-- Notificaciones -->
-    <p v-if="success" class="success">{{ success }}</p>
     <p v-if="error" class="error">{{ error }}</p>
 
     <div v-if="loading">Cargando perfil…</div>
@@ -159,7 +158,6 @@ const router = useRouter()
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
-const success = ref('')
 const isEditingProfile = ref(false)
 const isCreatingJob = ref(false)
 
@@ -224,7 +222,7 @@ async function saveProfile() {
   error.value = ''
   try {
     await updateCompanyProfile({ ...form.value })
-    success.value = 'Perfil actualizado correctamente.'
+    alert('Perfil actualizado correctamente.')
     isEditingProfile.value = false
     loadProfile()
   } catch {
@@ -388,7 +386,6 @@ onMounted(() => {
   border-color: #0056b3;
 }
 .error { color: #c00; margin: 1rem 0; }
-.success { color: #060; margin: 1rem 0; }
 .profile-form input,
 .profile-form textarea,
 .job-form input,

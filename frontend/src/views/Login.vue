@@ -1,38 +1,44 @@
 <template>
-  <div class="auth-container">
-    <h2>Login de {{ roleLabel }}</h2>
+  <div class="login-page">
+    <AppLogo />
+    <div class="auth-container">
+      <h2>Login de {{ roleLabel }}</h2>
+  
+      <form @submit.prevent="submitForm" class="auth-form">
+        <input
+          v-model="form.email"
+          type="email"
+          placeholder="Email"
+          required
+        />
+        <input
+          v-model="form.password"
+          type="password"
+          placeholder="Contraseña"
+          required
+        />
+        <button type="submit" :disabled="loading">
+          {{ loading ? 'Validando…' : 'Entrar' }}
+        </button>
+        <p v-if="error" class="error">{{ error }}</p>
+      </form>
+  
+      <p>
+        No tienes cuenta?
+        <router-link :to="{ name: 'register', query: { role } }">
+          Registrarse
+        </router-link>
+      </p>
+    </div>
 
-    <form @submit.prevent="submitForm" class="auth-form">
-      <input
-        v-model="form.email"
-        type="email"
-        placeholder="Email"
-        required
-      />
-      <input
-        v-model="form.password"
-        type="password"
-        placeholder="Contraseña"
-        required
-      />
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Validando…' : 'Entrar' }}
-      </button>
-      <p v-if="error" class="error">{{ error }}</p>
-    </form>
-
-    <p>
-      No tienes cuenta?
-      <router-link :to="{ name: 'register', query: { role } }">
-        Registrarse
-      </router-link>
-    </p>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import AppLogo from '../components/AppLogo.vue'
 
 // 1) Importamos los servicios en lugar de axios directamente
 import { login, getMe } from '../services/auth.js'

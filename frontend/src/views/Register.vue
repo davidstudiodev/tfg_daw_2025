@@ -1,36 +1,40 @@
 <template>
-  <div class="auth-container">
-    <h2>Registro de {{ roleLabel }}</h2>
-    <form @submit.prevent="submitForm" class="auth-form">
-      <input
-        v-model="form.name"
-        type="text"
-        placeholder="Nombre"
-        required
-      />
-      <input
-        v-model="form.email"
-        type="email"
-        placeholder="Email"
-        required
-      />
-      <input
-        v-model="form.password"
-        type="password"
-        placeholder="Contraseña"
-        required
-      />
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Registrando…' : 'Registrarse' }}
-      </button>
-      <p v-if="error" class="error">{{ error }}</p>
-    </form>
-    <p>
-      Ya tienes cuenta?
-      <router-link :to="{ name: 'login', query: { role } }">
-        Iniciar sesión
-      </router-link>
-    </p>
+  <div class="register-page">
+    <AppLogo />
+
+    <div class="auth-container">
+      <h2>Registro de {{ roleLabel }}</h2>
+      <form @submit.prevent="submitForm" class="auth-form">
+        <input
+          v-model="form.name"
+          type="text"
+          placeholder="Nombre"
+          required
+        />
+        <input
+          v-model="form.email"
+          type="email"
+          placeholder="Email"
+          required
+        />
+        <input
+          v-model="form.password"
+          type="password"
+          placeholder="Contraseña"
+          required
+        />
+        <button type="submit" :disabled="loading">
+          {{ loading ? 'Registrando…' : 'Registrarse' }}
+        </button>
+        <p v-if="error" class="error">{{ error }}</p>
+      </form>
+      <p>
+        Ya tienes cuenta?
+        <router-link :to="{ name: 'login', query: { role } }">
+          Iniciar sesión
+        </router-link>
+      </p>
+    </div>
   </div>
 </template>
 
@@ -43,6 +47,8 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { register as registerUser } from '../services/auth.js'  // << importa tu service
+
+import AppLogo from '../components/AppLogo.vue'
 
 const route = useRoute()
 const router = useRouter()
