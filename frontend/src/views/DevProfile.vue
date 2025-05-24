@@ -3,7 +3,6 @@
     <h1>Perfil de Developer</h1>
 
     <!-- Notificaciones -->
-    <p v-if="success" class="success">{{ success }}</p>
     <p v-if="error" class="error">{{ error }}</p>
 
     <!-- Estado de carga -->
@@ -210,7 +209,6 @@ const router = useRouter();
 const loading = ref(true);
 const saving = ref(false);
 const error = ref('');
-const success = ref('');
 const isEditing = ref(false);
 const fieldErrors = ref({});
 
@@ -355,34 +353,13 @@ function validateForm() {
 }
 
 async function saveProfile() {
-  error.value = '';
-  success.value = '';
-  if (!validateForm()) {
-    error.value = 'Corrige los campos marcados.';
-    return;
-  }
-  fieldErrors.value = {};
   saving.value = true;
-  const tech_stack = techOptions.map(sec => ({
-    category: sec.category,
-    items: sec.items.filter(i => selected.value.includes(i))
-  }));
+  error.value = '';
   try {
-    await updateDevProfile({
-      name: form.value.name,
-      email: form.value.email,
-      profession: form.value.profession,
-      phone: form.value.phone,
-      description: form.value.description,
-      years_experience: form.value.years_experience,
-      location: form.value.location,
-      tech_stack,
-      avatar: form.value.avatar
-    });
-    form.value.tech_stack = tech_stack;
-    success.value = 'Perfil actualizado correctamente.';
-    isEditing.value = false;
-    await loadProfile();
+    await updateDevProfile(form.value)
+    alert('Perfil actualizado correctamente.')
+    isEditing.value = false
+    await loadProfile()
   } catch (e) {
     if (e.response && e.response.data && e.response.data.errors) {
       e.response.data.errors.forEach(err => {
@@ -390,7 +367,7 @@ async function saveProfile() {
       });
       error.value = 'Corrige los campos marcados.';
     } else {
-      error.value = 'Error al guardar datos.';
+      error.value = 'Error al guardar el perfil.';
     }
   } finally {
     saving.value = false;

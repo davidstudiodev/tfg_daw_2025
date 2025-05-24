@@ -289,19 +289,13 @@ function validateCompanyProfile() {
 }
 
 async function saveProfile() {
-  error.value = '';
-  success.value = '';
-  if (!validateCompanyProfile()) {
-    error.value = 'Corrige los campos marcados.';
-    return;
-  }
-  fieldErrors.value = {};
   saving.value = true;
+  error.value = '';
   try {
-    await updateCompanyProfile({ ...form.value });
-    success.value = 'Perfil actualizado correctamente.';
-    isEditingProfile.value = false;
-    await loadProfile();
+    await updateCompanyProfile(form.value)
+    alert('Perfil actualizado correctamente.')
+    isEditingProfile.value = false
+    await loadProfile()
   } catch (e) {
     if (e.response && e.response.data && e.response.data.errors) {
       e.response.data.errors.forEach(err => {
