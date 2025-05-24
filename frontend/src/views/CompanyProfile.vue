@@ -8,17 +8,32 @@
     <div v-if="loading">Cargando perfil…</div>
 
     <!-- Formulario de edición de perfil -->
-    <form v-else-if="isEditingProfile" @submit.prevent="saveProfile" class="profile-form">
+    <form v-if="isEditingProfile" @submit.prevent="saveProfile" class="profile-form">
       <label>
         Avatar
         <input type="file" accept="image/*" @change="handleAvatarChange" />
       </label>
       <img v-if="form.avatar" :src="form.avatar" alt="Vista previa" class="avatar-preview" />
-      <label>Nombre <input v-model="form.name" required /></label>
-      <label>Correo <input v-model="form.email" required /></label>
-      <label>Ubicación <input v-model="form.location" required /></label>
-      <label>Teléfono <input v-model="form.phone" required /></label>
-      <label>Descripción <textarea v-model="form.description" rows="3" required /></label>
+      <label>Nombre
+        <input v-model="form.name" :class="{ 'input-error': fieldErrors.name }" required />
+        <span v-if="fieldErrors.name" class="input-error-message">{{ fieldErrors.name }}</span>
+      </label>
+      <label>Correo
+        <input v-model="form.email" :class="{ 'input-error': fieldErrors.email }" required />
+        <span v-if="fieldErrors.email" class="input-error-message">{{ fieldErrors.email }}</span>
+      </label>
+      <label>Ubicación
+        <input v-model="form.location" :class="{ 'input-error': fieldErrors.location }" required />
+        <span v-if="fieldErrors.location" class="input-error-message">{{ fieldErrors.location }}</span>
+      </label>
+      <label>Teléfono
+        <input v-model="form.phone" :class="{ 'input-error': fieldErrors.phone }" required />
+        <span v-if="fieldErrors.phone" class="input-error-message">{{ fieldErrors.phone }}</span>
+      </label>
+      <label>Descripción
+        <textarea v-model="form.description" rows="3" :class="{ 'input-error': fieldErrors.description }" required />
+        <span v-if="fieldErrors.description" class="input-error-message">{{ fieldErrors.description }}</span>
+      </label>
       <div class="actions">
         <button type="submit" class="save-btn">Guardar</button>
         <button type="button" @click="cancelEditProfile" class="cancel-btn">Cancelar</button>
@@ -30,7 +45,7 @@
       <h2>Crear nueva oferta</h2>
       <label>
         Descripción
-        <textarea v-model="job.description" :class="{ 'input-error': fieldErrors.description }" maxlength="20" required />
+        <textarea v-model="job.description" :class="{ 'input-error': fieldErrors.description }" required />
         <span v-if="fieldErrors.description" class="input-error-message">{{ fieldErrors.description }}</span>
       </label>
       <label>
@@ -68,12 +83,13 @@
             v-for="item in section.items"
             :key="item"
             type="button"
-            :class="{ selected: jobSelected.includes(item) }"
+            :class="{ selected: jobSelected.includes(item), 'input-error': fieldErrors.tech_stack }"
             @click="toggleJobTech(item)"
           >
             {{ item }}
           </button>
         </div>
+        <span v-if="fieldErrors.tech_stack" class="input-error-message">{{ fieldErrors.tech_stack }}</span>
       </div>
       <div class="actions">
         <button type="submit" class="publish-btn">Publicar oferta</button>
@@ -185,6 +201,7 @@ const router = useRouter()
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
+const success = ref('')
 const isEditingProfile = ref(false)
 const isCreatingJob = ref(false)
 
@@ -244,18 +261,52 @@ function cancelEditProfile() {
   loadProfile()
 }
 
+const fieldErrors = ref({});
+function validateCompanyProfile() {
+  fieldErrors.value = {};
+  if (!form.value.name || form.value.name.trim().length === 0) {
+    fieldErrors.value.name = 'El nombre es obligatorio.';
+  }
+  if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
+    fieldErrors.value.email = 'El email no es válido.';
+  }
+  if (!form.value.location || form.value.location.trim().length === 0) {
+    fieldErrors.value.location = 'La ubicación es obligatoria.';
+  }
+  if (!form.value.phone || !/^\d{7,}$/.test(form.value.phone)) {
+    fieldErrors.value.phone = 'El teléfono debe tener solo números y al menos 7 dígitos.';
+  }
+  if (!form.value.description || form.value.description.trim().length < 10) {
+    fieldErrors.value.description = 'La descripción debe tener al menos 10 caracteres.';
+  }
+  return Object.keys(fieldErrors.value).length === 0;
+}
+
 async function saveProfile() {
-  saving.value = true
-  error.value = ''
+  error.value = '';
+  success.value = '';
+  if (!validateCompanyProfile()) {
+    error.value = 'Corrige los campos marcados.';
+    return;
+  }
+  fieldErrors.value = {};
+  saving.value = true;
   try {
-    await updateCompanyProfile({ ...form.value })
-    alert('Perfil actualizado correctamente.')
-    isEditingProfile.value = false
-    loadProfile()
-  } catch {
-    error.value = 'Error al guardar el perfil.'
+    await updateCompanyProfile({ ...form.value });
+    success.value = 'Perfil actualizado correctamente.';
+    isEditingProfile.value = false;
+    await loadProfile();
+  } catch (e) {
+    if (e.response && e.response.data && e.response.data.errors) {
+      e.response.data.errors.forEach(err => {
+        fieldErrors.value[err.param] = err.msg;
+      });
+      error.value = 'Corrige los campos marcados.';
+    } else {
+      error.value = 'Error al guardar el perfil.';
+    }
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 
@@ -281,27 +332,55 @@ function toggleJobTech(item) {
   else jobSelected.value.push(item)
 }
 
-const fieldErrors = ref({});
+function validateJob() {
+  fieldErrors.value = {};
+  if (!job.value.description || job.value.description.trim().length < 10) {
+    fieldErrors.value.description = 'La descripción debe tener al menos 10 caracteres.';
+  }
+  if (!job.value.sector || job.value.sector.trim().length === 0) {
+    fieldErrors.value.sector = 'El sector es obligatorio.';
+  }
+  if (!job.value.salary || isNaN(job.value.salary)) {
+    fieldErrors.value.salary = 'El salario debe ser un número.';
+  }
+  if (!['remoto', 'hibrido', 'local'].includes(job.value.work_mode)) {
+    fieldErrors.value.work_mode = 'Selecciona un tipo de trabajo válido.';
+  }
+  if (!['completa', 'parcial', 'practicas'].includes(job.value.work_time)) {
+    fieldErrors.value.work_time = 'Selecciona una jornada válida.';
+  }
+  if (!Array.isArray(job.value.tech_stack) || job.value.tech_stack.flatMap(sec => sec.items).length === 0) {
+    fieldErrors.value.tech_stack = 'Selecciona al menos una tecnología.';
+  }
+  return Object.keys(fieldErrors.value).length === 0;
+}
 
 async function publishJob() {
+  error.value = '';
+  success.value = '';
   job.value.tech_stack = techOptions.map(sec => ({
     category: sec.category,
     items: sec.items.filter(i => jobSelected.value.includes(i))
-  }))
+  }));
+  if (!validateJob()) {
+    error.value = 'Corrige los campos marcados.';
+    return;
+  }
   fieldErrors.value = {};
   try {
-    await createJob({ ...job.value })
-    alert('Oferta publicada correctamente.')
-    isCreatingJob.value = false
-    await loadJobs()
+    await createJob({ ...job.value });
+    alert('Oferta publicada correctamente.');
+    success.value = 'Oferta publicada correctamente.';
+    isCreatingJob.value = false;
+    await loadJobs();
   } catch (e) {
     if (e.response && e.response.data && e.response.data.errors) {
-      // Mapear errores a los campos
       e.response.data.errors.forEach(err => {
         fieldErrors.value[err.param] = err.msg;
       });
+      error.value = 'Corrige los campos marcados.';
     } else {
-      error.value = 'Error al publicar la oferta.'
+      error.value = 'Error al publicar la oferta.';
     }
   }
 }
