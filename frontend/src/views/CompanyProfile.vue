@@ -28,24 +28,38 @@
     <!-- Formulario de creación de oferta -->
     <form v-else-if="isCreatingJob" @submit.prevent="publishJob" class="job-form">
       <h2>Crear nueva oferta</h2>
-      <label>Descripción <textarea v-model="job.description" required /></label>
-      <label>Sector <input v-model="job.sector" required /></label>
-      <label>Salario <input v-model="job.salary" required /></label>
+      <label>
+        Descripción
+        <textarea v-model="job.description" :class="{ 'input-error': fieldErrors.description }" maxlength="20" required />
+        <span v-if="fieldErrors.description" class="input-error-message">{{ fieldErrors.description }}</span>
+      </label>
+      <label>
+        Sector
+        <input v-model="job.sector" :class="{ 'input-error': fieldErrors.sector }" required />
+        <span v-if="fieldErrors.sector" class="input-error-message">{{ fieldErrors.sector }}</span>
+      </label>
+      <label>
+        Salario
+        <input v-model="job.salary" :class="{ 'input-error': fieldErrors.salary }" required />
+        <span v-if="fieldErrors.salary" class="input-error-message">{{ fieldErrors.salary }}</span>
+      </label>
       <label>
         Tipo de trabajo
-        <select v-model="job.work_mode" required>
+        <select v-model="job.work_mode" :class="{ 'input-error': fieldErrors.work_mode }" required>
           <option value="remoto">Remoto</option>
           <option value="hibrido">Híbrido</option>
           <option value="local">Local</option>
         </select>
+        <span v-if="fieldErrors.work_mode" class="input-error-message">{{ fieldErrors.work_mode }}</span>
       </label>
       <label>
         Tipo de jornada
-        <select v-model="job.work_time" required>
+        <select v-model="job.work_time" :class="{ 'input-error': fieldErrors.work_time }" required>
           <option value="completa">Completa</option>
           <option value="parcial">Parcial</option>
           <option value="practicas">Prácticas</option>
         </select>
+        <span v-if="fieldErrors.work_time" class="input-error-message">{{ fieldErrors.work_time }}</span>
       </label>
       <div v-for="section in techOptions" :key="section.category" class="tech-section">
         <h3>{{ section.category }}</h3>
@@ -267,18 +281,28 @@ function toggleJobTech(item) {
   else jobSelected.value.push(item)
 }
 
+const fieldErrors = ref({});
+
 async function publishJob() {
   job.value.tech_stack = techOptions.map(sec => ({
     category: sec.category,
     items: sec.items.filter(i => jobSelected.value.includes(i))
   }))
+  fieldErrors.value = {};
   try {
     await createJob({ ...job.value })
     alert('Oferta publicada correctamente.')
     isCreatingJob.value = false
     await loadJobs()
-  } catch {
-    error.value = 'Error al publicar la oferta.'
+  } catch (e) {
+    if (e.response && e.response.data && e.response.data.errors) {
+      // Mapear errores a los campos
+      e.response.data.errors.forEach(err => {
+        fieldErrors.value[err.param] = err.msg;
+      });
+    } else {
+      error.value = 'Error al publicar la oferta.'
+    }
   }
 }
 
@@ -437,5 +461,14 @@ onMounted(() => {
   border: 1px solid #ddd;
   border-radius: 8px;
   background: #fff;
+}
+.input-error {
+  border: 1.5px solid #c00 !important;
+  background: #fff0f0;
+}
+.input-error-message {
+  color: #c00;
+  font-size: 0.9em;
+  margin-left: 0.5em;
 }
 </style>

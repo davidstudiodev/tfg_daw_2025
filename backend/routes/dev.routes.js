@@ -1,6 +1,8 @@
 // routes/dev.routes.js
 import express from 'express'
 import authMiddleware from '../middlewares/auth.middleware.js'
+import validateRequest from '../middlewares/validateRequest.js'
+import { body } from 'express-validator'
 import {
   getDeveloperProfile,
   updateDeveloperProfile,
@@ -13,7 +15,21 @@ const router = express.Router()
 router.get('/profile', authMiddleware, getDeveloperProfile)
 
 // Actualizar perfil del dev
-router.put('/profile', authMiddleware, updateDeveloperProfile)
+router.put(
+  '/profile',
+  authMiddleware,
+  [
+    body('profession').isString().notEmpty(),
+    body('phone').isString().notEmpty(),
+    body('description').isString().isLength({ min: 10 }),
+    body('years_experience').isInt({ min: 0 }),
+    body('location').isString().notEmpty(),
+    body('tech_stack').isArray(),
+    body('avatar').optional().isString()
+  ],
+  validateRequest,
+  updateDeveloperProfile
+)
 
 // Ver aplicaciones del dev
 router.get('/applications', authMiddleware, getDevApplications)

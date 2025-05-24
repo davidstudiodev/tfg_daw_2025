@@ -67,8 +67,10 @@
           type="text"
           v-model="form.profession"
           :disabled="!isEditing"
+          :class="{ 'input-error': fieldErrors.profession }"
           required
         />
+        <span v-if="fieldErrors.profession" class="input-error-message">{{ fieldErrors.profession }}</span>
       </label>
 
       <label>
@@ -77,8 +79,10 @@
           type="tel"
           v-model="form.phone"
           :disabled="!isEditing"
+          :class="{ 'input-error': fieldErrors.phone }"
           required
         />
+        <span v-if="fieldErrors.phone" class="input-error-message">{{ fieldErrors.phone }}</span>
       </label>
 
       <label>
@@ -87,8 +91,10 @@
           v-model="form.description"
           rows="3"
           :disabled="!isEditing"
+          :class="{ 'input-error': fieldErrors.description }"
           required
         ></textarea>
+        <span v-if="fieldErrors.description" class="input-error-message">{{ fieldErrors.description }}</span>
       </label>
 
       <label>
@@ -98,8 +104,10 @@
           v-model.number="form.years_experience"
           min="0"
           :disabled="!isEditing"
+          :class="{ 'input-error': fieldErrors.years_experience }"
           required
         />
+        <span v-if="fieldErrors.years_experience" class="input-error-message">{{ fieldErrors.years_experience }}</span>
       </label>
 
       <label>
@@ -108,8 +116,10 @@
           type="text"
           v-model="form.location"
           :disabled="!isEditing"
+          :class="{ 'input-error': fieldErrors.location }"
           required
         />
+        <span v-if="fieldErrors.location" class="input-error-message">{{ fieldErrors.location }}</span>
       </label>
 
       <!-- Selección de tecnologías -->
@@ -202,6 +212,7 @@ const saving = ref(false);
 const error = ref('');
 const success = ref('');
 const isEditing = ref(false);
+const fieldErrors = ref({});
 
 // Reactive form data
 const form = ref({
@@ -318,21 +329,69 @@ function toggleTech(item) {
   else selected.value.push(item);
 }
 
+function validateForm() {
+  fieldErrors.value = {};
+  // Profesión
+  if (!form.value.profession || form.value.profession.trim().length === 0) {
+    fieldErrors.value.profession = 'La profesión es obligatoria.';
+  }
+  // Teléfono: solo números, mínimo 7 dígitos
+  if (!/^\d{7,}$/.test(form.value.phone)) {
+    fieldErrors.value.phone = 'El teléfono debe tener solo números y al menos 7 dígitos.';
+  }
+  // Biografía
+  if (!form.value.description || form.value.description.trim().length < 10) {
+    fieldErrors.value.description = 'La biografía debe tener al menos 10 caracteres.';
+  }
+  // Años de experiencia
+  if (!Number.isInteger(form.value.years_experience) || form.value.years_experience < 0) {
+    fieldErrors.value.years_experience = 'Debe ser un número entero positivo.';
+  }
+  // Ubicación
+  if (!form.value.location || form.value.location.trim().length === 0) {
+    fieldErrors.value.location = 'La ubicación es obligatoria.';
+  }
+  return Object.keys(fieldErrors.value).length === 0;
+}
+
 async function saveProfile() {
-  if (error.value) return;
   error.value = '';
+  success.value = '';
+  if (!validateForm()) {
+    error.value = 'Corrige los campos marcados.';
+    return;
+  }
+  fieldErrors.value = {};
   saving.value = true;
   const tech_stack = techOptions.map(sec => ({
     category: sec.category,
     items: sec.items.filter(i => selected.value.includes(i))
   }));
   try {
-    await updateDevProfile({ ...form.value, tech_stack });
+    await updateDevProfile({
+      name: form.value.name,
+      email: form.value.email,
+      profession: form.value.profession,
+      phone: form.value.phone,
+      description: form.value.description,
+      years_experience: form.value.years_experience,
+      location: form.value.location,
+      tech_stack,
+      avatar: form.value.avatar
+    });
     form.value.tech_stack = tech_stack;
-    alert('Perfil actualizado correctamente.');
+    success.value = 'Perfil actualizado correctamente.';
     isEditing.value = false;
-  } catch {
-    error.value = 'Error al guardar datos.';
+    await loadProfile();
+  } catch (e) {
+    if (e.response && e.response.data && e.response.data.errors) {
+      e.response.data.errors.forEach(err => {
+        fieldErrors.value[err.param] = err.msg;
+      });
+      error.value = 'Corrige los campos marcados.';
+    } else {
+      error.value = 'Error al guardar datos.';
+    }
   } finally {
     saving.value = false;
   }
@@ -508,5 +567,13 @@ onMounted(() => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+.input-error {
+  border: 1px solid #c00;
+}
+.input-error-message {
+  color: #c00;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 </style>
