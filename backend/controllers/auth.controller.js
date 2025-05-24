@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { pool } from '../config/db.js';
 import { createUser, findUserByEmail } from '../models/User.js';
+import { sendMail } from '../utils/mailer.js';
 
 export const register = async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -27,9 +28,17 @@ export const register = async (req, res) => {
       );
     }
 
+    // Enviar email de bienvenida
+    await sendMail({
+      to: email,
+      subject: '¡Bienvenido a JobsXDevs!',
+      html: `<h1>Hola ${name}!</h1><p>Gracias por registrarte en JobsXDevs.</p>`
+    });
+
     res.status(201).json({ message: 'User created', userId });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    console.error('Error en registro:', error);
+    res.status(500).json({ message: 'Server error', error: error.message || error });
   }
 };
 

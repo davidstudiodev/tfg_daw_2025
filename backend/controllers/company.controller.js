@@ -1,4 +1,5 @@
 import { pool } from '../config/db.js';
+import { sendMail } from '../utils/mailer.js';
 
 export const getCompanyProfile = async (req, res) => {
   const userId = req.user.id;
@@ -53,6 +54,20 @@ export const createJob = async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [companyId, description, sector, salary, work_mode, work_time, JSON.stringify(tech_stack)]
     );
+
+    // Obtener email de la empresa
+    const [companyRows] = await pool.query(
+      `SELECT u.email, u.name FROM users u WHERE u.id = ?`,
+      [companyId]
+    );
+    if (companyRows.length) {
+      await sendMail({
+        to: companyRows[0].email,
+        subject: 'Oferta publicada en JobsXDevs',
+        html: `<h1>¡Hola ${companyRows[0].name}!</h1><p>Tu oferta ha sido publicada correctamente.</p><p>Puedes ver tu oferta publicada aquí: <a href="/offers">Ver todas las ofertas</a></p>`
+      });
+    }
+
     res.status(201).json({ jobId: result.insertId });
   } catch (error) {
     console.error('Error creating job:', error);

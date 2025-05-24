@@ -1,5 +1,6 @@
 // controllers/dev.controller.js
 import { pool } from '../config/db.js';
+import { sendMail } from '../utils/mailer.js';
 
 export const getDeveloperProfile = async (req, res) => {
   const userId = req.user.id;
@@ -60,7 +61,7 @@ export const updateDeveloperProfile = async (req, res) => {
       [
         profession,
         phone,
-       description,
+        description,
         years_experience,
         location,
         JSON.stringify(tech_stack),
@@ -68,6 +69,20 @@ export const updateDeveloperProfile = async (req, res) => {
         userId
       ]
     );
+
+    // Obtener email y nombre del dev
+    const [rows] = await pool.query(
+      `SELECT u.email, u.name FROM users u WHERE u.id = ?`,
+      [userId]
+    );
+    if (rows.length) {
+      await sendMail({
+        to: rows[0].email,
+        subject: 'Perfil publicado en JobsXDevs',
+        html: `<h1>¡Hola ${rows[0].name}!</h1><p>Tu perfil ha sido publicado correctamente.</p><p>Puedes ver tu perfil publicado aquí: <a href="/developers">Ver todos los desarrolladores</a></p>`
+      });
+    }
+
     res.json({ message: 'Developer profile updated' });
   } catch (error) {
     console.error('Error updating developer profile:', error);
