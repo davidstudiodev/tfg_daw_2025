@@ -144,3 +144,24 @@ export const deleteJob = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Obtener los devs que han aplicado a las ofertas de la empresa
+export const getCompanyApplications = async (req, res) => {
+  const companyId = req.user.id;
+  try {
+    const [apps] = await pool.query(
+      `SELECT a.id as application_id, a.applied_at, j.id as offer_id, j.description, d.user_id as dev_id, u.name as dev_name, u.email as dev_email
+       FROM applications a
+       JOIN jobs j ON a.offer_id = j.id
+       JOIN developers d ON a.dev_id = d.user_id
+       JOIN users u ON d.user_id = u.id
+       WHERE j.company_id = ?
+       ORDER BY a.applied_at DESC`,
+      [companyId]
+    );
+    res.json(apps);
+  } catch (error) {
+    console.error('Error fetching company applications:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

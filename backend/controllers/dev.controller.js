@@ -89,3 +89,29 @@ export const updateDeveloperProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Obtener las ofertas a las que ha aplicado el dev
+export const getDevApplications = async (req, res) => {
+  const devId = req.user.id;
+  try {
+    const [apps] = await pool.query(
+      `SELECT a.id as application_id, a.applied_at, j.*, u.name as company_name, c.avatar as company_avatar
+       FROM applications a
+       JOIN jobs j ON a.offer_id = j.id
+       JOIN companies c ON j.company_id = c.user_id
+       JOIN users u ON c.user_id = u.id
+       WHERE a.dev_id = ?
+       ORDER BY a.applied_at DESC`,
+      [devId]
+    );
+    apps.forEach(app => {
+      if (typeof app.tech_stack === 'string') {
+        try { app.tech_stack = JSON.parse(app.tech_stack); } catch { app.tech_stack = []; }
+      }
+    });
+    res.json(apps);
+  } catch (error) {
+    console.error('Error fetching dev applications:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

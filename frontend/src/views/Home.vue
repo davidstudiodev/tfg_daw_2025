@@ -10,9 +10,12 @@
         </label>
       </div>
 
-      <div class="auth-buttons">
+      <div class="auth-buttons" v-if="!isLoggedIn">
         <button @click="goTo('login')">Login</button>
         <button @click="goTo('register')">Register</button>
+      </div>
+      <div class="auth-buttons" v-else>
+        <button @click="goToProfile">Ir a mi perfil</button>
       </div>
     </header>
 
@@ -30,16 +33,46 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import AppLogo from '../components/AppLogo.vue'
+import AppLogo from '../components/AppLogo.vue';
+import { getMe } from '../services/auth.js';
 
 const isCompany = ref(false);
 const router = useRouter();
 
+const isLoggedIn = ref(false);
+const userRole = ref('');
+
 const goTo = (type) => {
   router.push({ name: type, query: { role: isCompany.value ? 'company' : 'developer' } });
 };
+
+const goToProfile = () => {
+  if (userRole.value === 'company') {
+    router.push({ name: 'company-profile' });
+  } else {
+    router.push({ name: 'dev-profile' });
+  }
+};
+
+const checkAuth = async () => {
+  try {
+    const { data } = await getMe();
+    isLoggedIn.value = true;
+    userRole.value = data.role;
+    // Si es company, mostrar la vista de empresa por defecto
+    isCompany.value = data.role === 'company';
+  } catch {
+    isLoggedIn.value = false;
+    userRole.value = '';
+    isCompany.value = false;
+  }
+};
+
+onMounted(() => {
+  checkAuth();
+});
 </script>
 
 <style scoped>

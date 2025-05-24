@@ -143,6 +143,18 @@
         </form>
       </div>
     </section>
+
+    <!-- Aplicaciones a tus ofertas -->
+    <section v-if="applications.length" class="applications-section">
+      <h2>Desarrolladores que han aplicado a tus ofertas</h2>
+      <div class="applications-grid">
+        <div v-for="app in applications" :key="app.application_id" class="application-card">
+          <p><strong>Oferta:</strong> {{ app.description }}</p>
+          <p><strong>Dev:</strong> {{ app.dev_name }} ({{ app.dev_email }})</p>
+          <p><strong>Aplicó el:</strong> {{ new Date(app.applied_at).toLocaleDateString() }}</p>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -153,6 +165,7 @@ import { logout } from '../services/auth.js'
 import { getCompanyProfile, updateCompanyProfile, createJob } from '../services/profile.js'
 import { techOptions } from '../constants/techOptions.js'
 import { getCompanyJobs, updateJob, deleteJob } from '../services/profile.js'
+import api from '../services/api.js';
 
 const router = useRouter()
 const loading = ref(true)
@@ -325,9 +338,25 @@ async function saveEditJob() {
   await loadJobs()
 }
 
+const applications = ref([]);
+const loadingApplications = ref(false);
+
+async function loadApplications() {
+  loadingApplications.value = true;
+  try {
+    const { data } = await api.get('/api/company/applications');
+    applications.value = data;
+  } catch {
+    applications.value = [];
+  } finally {
+    loadingApplications.value = false;
+  }
+}
+
 onMounted(() => {
-  loadProfile()
-  loadJobs()
+  loadProfile();
+  loadJobs();
+  loadApplications();
 })
 </script>
 
@@ -394,5 +423,19 @@ onMounted(() => {
   padding: 0.5rem;
   font-size: 1rem;
   margin-bottom: 0.5rem;
+}
+.applications-section {
+  margin-top: 2rem;
+}
+.applications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+.application-card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
 }
 </style>

@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.routes.js';
 import protectedRoutes from './routes/protected.routes.js';
 import devRoutes from './routes/dev.routes.js'
 import companyRoutes from './routes/company.routes.js'
+import offersRoutes from './routes/offers.routes.js';
 
 // Import DB connection
 import db from './config/db.js';
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
 app.use('/api/dev', devRoutes)
 app.use('/api/company', companyRoutes)
+app.use('/api/offers', offersRoutes)
 
 // 404 handler
 app.use((req, res) => {

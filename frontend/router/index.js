@@ -5,6 +5,7 @@ import Register from '../src/views/Register.vue'
 import DevProfile from '../src/views/DevProfile.vue'
 import CompanyProfile from '../src/views/CompanyProfile.vue'
 import NotFound from '../src/views/NotFound.vue'
+import Offers from '../src/views/Offers.vue'
 
 import { getMe } from '../src/services/auth.js' // obtenemos el usuario desde la cookie HttpOnly
 
@@ -26,6 +27,7 @@ const routes = [
     path: '/company/profile', name: 'company-profile', component: CompanyProfile,
     meta: { requiresAuth: true, role: 'company' }
   },
+  { path: '/offers', name: 'offers', component: Offers },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound }
 ]
 

@@ -33,11 +33,11 @@
         <button type="button" @click="startEditing" class="edit-btn">
           Editar datos
         </button>
-        <button type="button" @click="handlePublish" class="publish-btn">
-          Publicar perfil
-        </button>
         <button type="button" @click="handleLogout" class="logout-btn">
           Cerrar sesión
+        </button>
+        <button type="button" @click="goToOffers" class="publish-btn">
+          Ver todas las ofertas
         </button>
       </div>
     </section>
@@ -140,15 +140,14 @@
           :disabled="saving || !isEditing"
           class="save-btn"
         >
-          {{ saving ? 'Guardando…' : 'Guardar datos' }}
+          {{ saving ? 'Guardando…' : 'Guardar y publicar' }}
         </button>
         <button
           type="button"
-          @click="handlePublish"
-          :disabled="!isEditing"
-          class="publish-btn"
+          @click="cancelEdit"
+          class="cancel-btn"
         >
-          Publicar perfil
+          Cancelar
         </button>
       </div>
 
@@ -160,6 +159,32 @@
         Cerrar sesión
       </button>
     </form>
+
+    <!-- Aplicaciones del dev -->
+    <section v-if="applications.length" class="applications-section">
+      <h2>Ofertas a las que has aplicado</h2>
+      <div class="applications-grid">
+        <div
+          v-for="app in applications"
+          :key="app.application_id"
+          class="application-card"
+        >
+          <div class="company-info">
+            <img
+              v-if="app.company_avatar"
+              :src="app.company_avatar"
+              class="company-logo"
+              alt="logo"
+            />
+            <span class="company-name">{{ app.company_name }}</span>
+          </div>
+          <p class="offer-description">{{ app.description }}</p>
+          <p><strong>Jornada:</strong> {{ app.work_time }}</p>
+          <p><strong>Salario:</strong> {{ app.salary }}</p>
+          <p><strong>Aplicaste el:</strong> {{ new Date(app.applied_at).toLocaleDateString() }}</p>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -169,6 +194,7 @@ import { useRouter } from 'vue-router';
 import { logout } from '../services/auth.js';
 import { getDevProfile, updateDevProfile } from '../services/profile.js';
 import { techOptions } from '../constants/techOptions.js';
+import api from '../services/api.js';
 
 const router = useRouter();
 const loading = ref(true);
@@ -201,6 +227,9 @@ const allTech = computed(() =>
         .flatMap(sec => sec.items)
     : []
 );
+
+const applications = ref([]);
+const loadingApplications = ref(false);
 
 async function loadProfile() {
   loading.value = true;
@@ -245,6 +274,18 @@ async function loadProfile() {
     isEditing.value = true;
   } finally {
     loading.value = false;
+  }
+}
+
+async function loadApplications() {
+  loadingApplications.value = true;
+  try {
+    const { data } = await api.get('/api/dev/applications');
+    applications.value = data;
+  } catch {
+    applications.value = [];
+  } finally {
+    loadingApplications.value = false;
   }
 }
 
@@ -307,7 +348,19 @@ async function handleLogout() {
   router.push({ name: 'login', query: { role: 'dev' } });
 }
 
-onMounted(loadProfile);
+function goToOffers() {
+  router.push({ name: 'offers' });
+}
+
+function cancelEdit() {
+  isEditing.value = false;
+  loadProfile(); // Recarga los datos originales
+}
+
+onMounted(() => {
+  loadProfile();
+  loadApplications();
+});
 </script>
 
 <style scoped>
@@ -391,5 +444,69 @@ onMounted(loadProfile);
 .profile-form button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+.applications-section {
+  margin-top: 2rem;
+}
+.application-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.application-card h3 {
+  margin-top: 0;
+}
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.view-btn {
+  background: #007bff;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.reapply-btn {
+  background: #43a047;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.applications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+.company-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.company-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+.company-name {
+  font-weight: bold;
+}
+.offer-description {
+  margin: 0.5rem 0;
+}
+.cancel-btn {
+  background: #aaa;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>
