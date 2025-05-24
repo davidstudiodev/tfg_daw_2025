@@ -471,6 +471,7 @@ async function saveEditJob() {
     return;
   }
   await updateJob(editingJobId.value, jobEdit.value)
+  alert('Oferta editada correctamente.')
   editingJobId.value = null
   jobEdit.value = {}
   jobEditSelected.value = []
