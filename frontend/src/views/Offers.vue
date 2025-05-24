@@ -33,7 +33,8 @@
           <img v-if="offer.company_avatar" :src="offer.company_avatar" class="company-logo" alt="logo" />
           <span class="company-name">{{ offer.company_name }}</span>
         </div>
-        <p class="offer-description">{{ offer.description }}</p>
+        <!-- Mostrar puesto en vez de description en la lista de ofertas -->
+        <p class="offer-description">{{ offer.puesto }}</p>
         <p><strong>Ubicación:</strong> {{ offer.company_location }}</p>
         <p><strong>Jornada:</strong> {{ offer.work_time }}</p>
         <p><strong>Salario:</strong> {{ offer.salary }}</p>
@@ -89,7 +90,8 @@ const fetchOffers = async () => {
   if (filters.value.salaryMax !== '') query += `&salaryMax=${filters.value.salaryMax}`;
   if (filters.value.salaryOrder) query += `&salaryOrder=${filters.value.salaryOrder}`;
   const { data } = await api.get(query);
-  offers.value = data.offers;
+  // Si alguna oferta viene con description, mapear a puesto
+  offers.value = data.offers.map(o => ({ ...o, puesto: o.puesto || o.description }));
   pages.value = data.pages;
 };
 

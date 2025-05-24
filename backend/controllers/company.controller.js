@@ -45,14 +45,15 @@ export const updateCompanyProfile = async (req, res) => {
   }
 };
 
+// Al crear oferta
 export const createJob = async (req, res) => {
   const companyId = req.user.id;
-  const { description, sector, salary, work_mode, work_time, tech_stack } = req.body;
+  const { puesto, sector, salary, work_mode, work_time, tech_stack } = req.body;
   try {
     const [result] = await pool.query(
-      `INSERT INTO jobs (company_id, description, sector, salary, work_mode, work_time, tech_stack)
+      `INSERT INTO jobs (company_id, puesto, sector, salary, work_mode, work_time, tech_stack)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [companyId, description, sector, salary, work_mode, work_time, JSON.stringify(tech_stack)]
+      [companyId, puesto, sector, salary, work_mode, work_time, JSON.stringify(tech_stack)]
     );
 
     // Obtener email de la empresa
@@ -113,19 +114,20 @@ export const getCompanyJobs = async (req, res) => {
   }
 };
 
-// Actualizar oferta
+// Al editar oferta
 export const updateJob = async (req, res) => {
   const companyId = req.user.id;
   const jobId = req.params.id;
-  const { description, sector, salary, work_mode, work_time, tech_stack } = req.body;
+  const { puesto, sector, salary, work_mode, work_time, tech_stack } = req.body;
   try {
     await pool.query(
-      `UPDATE jobs SET description=?, sector=?, salary=?, work_mode=?, work_time=?, tech_stack=?
+      `UPDATE jobs SET puesto=?, sector=?, salary=?, work_mode=?, work_time=?, tech_stack=?
        WHERE id=? AND company_id=?`,
-      [description, sector, salary, work_mode, work_time, JSON.stringify(tech_stack), jobId, companyId]
+      [puesto, sector, salary, work_mode, work_time, JSON.stringify(tech_stack), jobId, companyId]
     );
-    res.json({ message: 'Oferta actualizada' });
+    res.json({ message: 'Job updated' });
   } catch (error) {
+    console.error('Error updating job:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -150,7 +152,7 @@ export const getCompanyApplications = async (req, res) => {
   const companyId = req.user.id;
   try {
     const [apps] = await pool.query(
-      `SELECT a.id as application_id, a.applied_at, j.id as offer_id, j.description, d.user_id as dev_id, u.name as dev_name, u.email as dev_email
+      `SELECT a.id as application_id, a.applied_at, j.id as offer_id, j.puesto, d.user_id as dev_id, u.name as dev_name, u.email as dev_email
        FROM applications a
        JOIN jobs j ON a.offer_id = j.id
        JOIN developers d ON a.dev_id = d.user_id
