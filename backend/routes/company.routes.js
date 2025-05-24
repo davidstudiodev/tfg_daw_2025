@@ -34,12 +34,13 @@ router.put(
 )
 
 // Gestión de ofertas
+// Cambiar validaciones de ofertas de trabajo a 'puesto'
 router.post(
   '/jobs',
   createJobLimiter,
   authMiddleware,
   [
-    body('description').isString().isLength({ max: 20 }),
+    body('puesto').isString().isLength({ max: 20 }),
     body('sector').isString().notEmpty(),
     body('salary').isNumeric(),
     body('work_mode').isIn(['remoto', 'hibrido', 'local']),
@@ -50,7 +51,14 @@ router.post(
   createJob
 )
 router.get('/jobs', authMiddleware, getCompanyJobs)
-router.put('/jobs/:id', authMiddleware, updateJob)
+router.put('/jobs/:id', authMiddleware, [
+  body('puesto').isString().isLength({ max: 20 }),
+  body('sector').isString().notEmpty(),
+  body('salary').isNumeric(),
+  body('work_mode').isIn(['remoto', 'hibrido', 'local']),
+  body('work_time').isIn(['completa', 'parcial', 'practicas']),
+  body('tech_stack').isArray()
+], validateRequest, updateJob)
 router.delete('/jobs/:id', authMiddleware, deleteJob)
 
 // Ver aplicaciones a las ofertas

@@ -35,7 +35,7 @@ export const listOffers = async (req, res) => {
 
   try {
     const [offers] = await pool.query(
-      `SELECT j.id, j.description, j.sector, j.salary, j.work_mode, j.work_time, j.tech_stack, j.created_at,
+      `SELECT j.id, j.puesto, j.sector, j.salary, j.work_mode, j.work_time, j.tech_stack, j.created_at,
               u.name as company_name, c.avatar as company_avatar, c.location as company_location
        FROM jobs j
        JOIN companies c ON j.company_id = c.user_id
@@ -80,7 +80,7 @@ export const applyToOffer = async (req, res) => {
     await createApplication({ offerId, devId });
     // Obtener datos de la oferta y del dev
     const [[offer]] = await pool.query(
-      `SELECT j.description, j.sector, j.salary, j.work_mode, j.work_time, j.tech_stack, u.name as company_name
+      `SELECT j.puesto, j.sector, j.salary, j.work_mode, j.work_time, j.tech_stack, u.name as company_name
        FROM jobs j JOIN companies c ON j.company_id = c.user_id JOIN users u ON c.user_id = u.id WHERE j.id = ?`,
       [offerId]
     );
@@ -92,7 +92,7 @@ export const applyToOffer = async (req, res) => {
     await sendMail({
       to: dev.email,
       subject: 'Gracias por aplicar a una oferta',
-      html: `<h1>¡Hola ${dev.name}!</h1><p>Gracias por aplicar a la oferta de ${offer.company_name}.</p><p><strong>Descripción:</strong> ${offer.description}</p><p><strong>Salario:</strong> ${offer.salary}</p>`
+      html: `<h1>¡Hola ${dev.name}!</h1><p>Gracias por aplicar a la oferta de ${offer.company_name}.</p><p><strong>Puesto:</strong> ${offer.puesto}</p><p><strong>Salario:</strong> ${offer.salary}</p>`
     });
     // (Opcional) Enviar email a la empresa
     const [[company]] = await pool.query(
@@ -103,7 +103,7 @@ export const applyToOffer = async (req, res) => {
       await sendMail({
         to: company.email,
         subject: 'Nuevo candidato para tu oferta',
-        html: `<h1>¡Hola ${company.name}!</h1><p>Un desarrollador ha aplicado a tu oferta: <strong>${offer.description}</strong>.</p><p>Revisa tu panel para más detalles.</p>`
+        html: `<h1>¡Hola ${company.name}!</h1><p>Un desarrollador ha aplicado a tu oferta: <strong>${offer.puesto}</strong>.</p><p>Revisa tu panel para más detalles.</p>`
       });
     }
     res.json({ message: 'Has aplicado correctamente y te contactaremos pronto.' });

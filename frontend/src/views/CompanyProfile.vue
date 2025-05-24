@@ -44,9 +44,9 @@
     <form v-else-if="isCreatingJob" @submit.prevent="publishJob" class="job-form">
       <h2>Crear nueva oferta</h2>
       <label>
-        Descripción
-        <textarea v-model="job.description" :class="{ 'input-error': fieldErrors.description }" required />
-        <span v-if="fieldErrors.description" class="input-error-message">{{ fieldErrors.description }}</span>
+        Puesto
+        <textarea v-model="job.puesto" :class="{ 'input-error': fieldErrors.puesto }" maxlength="20" required />
+        <span v-if="fieldErrors.puesto" class="input-error-message">{{ fieldErrors.puesto }}</span>
       </label>
       <label>
         Sector
@@ -117,7 +117,7 @@
       <h2>Ofertas publicadas</h2>
       <div v-for="job in jobs" :key="job.id" class="job-card">
         <div v-if="editingJobId !== job.id">
-          <p><strong>Descripción:</strong> {{ job.description }}</p>
+          <p><strong>Puesto:</strong> {{ job.puesto }}</p>
           <p><strong>Sector:</strong> {{ job.sector }}</p>
           <p><strong>Salario:</strong> {{ job.salary }}</p>
           <p><strong>Tipo de trabajo:</strong> {{ job.work_mode }}</p>
@@ -133,24 +133,30 @@
           <button @click="removeJob(job.id)" class="logout-btn">Eliminar</button>
         </div>
         <form v-else @submit.prevent="saveEditJob" class="job-form">
-          <label>Descripción <textarea v-model="jobEdit.description" required /></label>
-          <label>Sector <input v-model="jobEdit.sector" required /></label>
-          <label>Salario <input v-model="jobEdit.salary" required /></label>
+          <label>Puesto
+            <textarea v-model="jobEdit.puesto" :class="{ 'input-error': fieldErrors.puesto }" maxlength="20" required /></label>
+            <span v-if="fieldErrors.puesto" class="input-error-message">{{ fieldErrors.puesto }}</span>
+          <label>Sector <input v-model="jobEdit.sector" :class="{ 'input-error': fieldErrors.sector }" required /></label>
+            <span v-if="fieldErrors.sector" class="input-error-message">{{ fieldErrors.sector }}</span>
+          <label>Salario <input v-model="jobEdit.salary" :class="{ 'input-error': fieldErrors.salary }" required /></label>
+            <span v-if="fieldErrors.salary" class="input-error-message">{{ fieldErrors.salary }}</span>
           <label>
             Tipo de trabajo
-            <select v-model="jobEdit.work_mode" required>
+            <select v-model="jobEdit.work_mode" :class="{ 'input-error': fieldErrors.work_mode }" required>
               <option value="remoto">Remoto</option>
               <option value="hibrido">Híbrido</option>
               <option value="local">Local</option>
             </select>
+            <span v-if="fieldErrors.work_mode" class="input-error-message">{{ fieldErrors.work_mode }}</span>
           </label>
           <label>
             Tipo de jornada
-            <select v-model="jobEdit.work_time" required>
+            <select v-model="jobEdit.work_time" :class="{ 'input-error': fieldErrors.work_time }" required>
               <option value="completa">Completa</option>
               <option value="parcial">Parcial</option>
               <option value="practicas">Prácticas</option>
             </select>
+            <span v-if="fieldErrors.work_time" class="input-error-message">{{ fieldErrors.work_time }}</span>
           </label>
           <div v-for="section in techOptions" :key="section.category" class="tech-section">
             <h3>{{ section.category }}</h3>
@@ -179,7 +185,7 @@
       <h2>Desarrolladores que han aplicado a tus ofertas</h2>
       <div class="applications-grid">
         <div v-for="app in applications" :key="app.application_id" class="application-card">
-          <p><strong>Oferta:</strong> {{ app.description }}</p>
+          <p><strong>Oferta:</strong> {{ app.puesto }}</p>
           <p><strong>Dev:</strong> {{ app.dev_name }} ({{ app.dev_email }})</p>
           <p><strong>Aplicó el:</strong> {{ new Date(app.applied_at).toLocaleDateString() }}</p>
         </div>
@@ -215,7 +221,7 @@ const form = ref({
 })
 
 const job = ref({
-  description: '',
+  puesto: '',
   sector: '',
   salary: '',
   work_mode: 'remoto',
@@ -313,7 +319,7 @@ async function saveProfile() {
 function startCreatingJob() {
   isCreatingJob.value = true
   job.value = {
-    description: '',
+    puesto: '',
     sector: '',
     salary: '',
     work_mode: 'remoto',
@@ -334,8 +340,11 @@ function toggleJobTech(item) {
 
 function validateJob() {
   fieldErrors.value = {};
-  if (!job.value.description || job.value.description.trim().length < 10) {
-    fieldErrors.value.description = 'La descripción debe tener al menos 10 caracteres.';
+  // Puesto: requerido, máximo 20 caracteres
+  if (!job.value.puesto || job.value.puesto.trim().length === 0) {
+    fieldErrors.value.puesto = 'El puesto es obligatorio.';
+  } else if (job.value.puesto.length > 20) {
+    fieldErrors.value.puesto = 'El puesto debe tener máximo 20 caracteres.';
   }
   if (!job.value.sector || job.value.sector.trim().length === 0) {
     fieldErrors.value.sector = 'El sector es obligatorio.';
@@ -390,24 +399,27 @@ async function handleLogout() {
   router.push({ name: 'login', query: { role: 'company' } })
 }
 
+// Cuando se reciben datos de la API, mapear description a puesto si es necesario (retrocompatibilidad)
 const jobs = ref([])
-const editingJobId = ref(null)
-const jobEdit = ref({})
-const jobEditSelected = ref([])
-
 const loadJobs = async () => {
   try {
     const { data } = await getCompanyJobs()
-    jobs.value = data
+    jobs.value = data.map(j => ({ ...j, puesto: j.puesto || j.description }))
   } catch {
     error.value = 'No se pudieron cargar las ofertas.'
   }
 }
 
-async function removeJob(id) {
+const editingJobId = ref(null)
+const jobEdit = ref({})
+const jobEditSelected = ref([])
+
+function removeJob(id) {
   if (confirm('¿Eliminar esta oferta?')) {
-    await deleteJob(id)
-    await loadJobs()
+    deleteJob(id)
+    .then(() => {
+      loadJobs()
+    })
   }
 }
 
@@ -429,11 +441,41 @@ function toggleEditJobTech(item) {
   else jobEditSelected.value.push(item)
 }
 
+function validateEditJob() {
+  fieldErrors.value = {};
+  // Puesto: requerido, máximo 20 caracteres
+  if (!jobEdit.value.puesto || jobEdit.value.puesto.trim().length === 0) {
+    fieldErrors.value.puesto = 'El puesto es obligatorio.';
+  } else if (jobEdit.value.puesto.length > 20) {
+    fieldErrors.value.puesto = 'El puesto debe tener máximo 20 caracteres.';
+  }
+  if (!jobEdit.value.sector || jobEdit.value.sector.trim().length === 0) {
+    fieldErrors.value.sector = 'El sector es obligatorio.';
+  }
+  if (!jobEdit.value.salary || isNaN(jobEdit.value.salary)) {
+    fieldErrors.value.salary = 'El salario debe ser un número.';
+  }
+  if (!['remoto', 'hibrido', 'local'].includes(jobEdit.value.work_mode)) {
+    fieldErrors.value.work_mode = 'Selecciona un tipo de trabajo válido.';
+  }
+  if (!['completa', 'parcial', 'practicas'].includes(jobEdit.value.work_time)) {
+    fieldErrors.value.work_time = 'Selecciona una jornada válida.';
+  }
+  if (!Array.isArray(jobEdit.value.tech_stack) || jobEdit.value.tech_stack.flatMap(sec => sec.items).length === 0) {
+    fieldErrors.value.tech_stack = 'Selecciona al menos una tecnología.';
+  }
+  return Object.keys(fieldErrors.value).length === 0;
+}
+
 async function saveEditJob() {
   jobEdit.value.tech_stack = techOptions.map(sec => ({
     category: sec.category,
     items: sec.items.filter(i => jobEditSelected.value.includes(i))
   }))
+  if (!validateEditJob()) {
+    error.value = 'Corrige los campos marcados.';
+    return;
+  }
   await updateJob(editingJobId.value, jobEdit.value)
   editingJobId.value = null
   jobEdit.value = {}
@@ -444,11 +486,12 @@ async function saveEditJob() {
 const applications = ref([]);
 const loadingApplications = ref(false);
 
+// Cuando se reciben aplicaciones, mapear description a puesto si es necesario (retrocompatibilidad)
 async function loadApplications() {
   loadingApplications.value = true;
   try {
     const { data } = await api.get('/api/company/applications');
-    applications.value = data;
+    applications.value = data.map(app => ({ ...app, puesto: app.puesto || app.description }));
   } catch {
     applications.value = [];
   } finally {
