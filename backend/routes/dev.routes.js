@@ -19,6 +19,8 @@ router.put(
   '/profile',
   authMiddleware,
   [
+    body('name').isString().notEmpty(),
+    body('email').isEmail(),
     body('profession').isString().notEmpty(),
     body('phone').isString().notEmpty(),
     body('description').isString().isLength({ min: 10 }),

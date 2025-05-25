@@ -61,6 +61,30 @@
       />
 
       <label>
+        Nombre
+        <input
+          type="text"
+          v-model="form.name"
+          :disabled="!isEditing"
+          :class="{ 'input-error': fieldErrors.name }"
+          required
+        />
+        <span v-if="fieldErrors.name" class="input-error-message">{{ fieldErrors.name }}</span>
+      </label>
+
+      <label>
+        Correo
+        <input
+          type="email"
+          v-model="form.email"
+          :disabled="!isEditing"
+          :class="{ 'input-error': fieldErrors.email }"
+          required
+        />
+        <span v-if="fieldErrors.email" class="input-error-message">{{ fieldErrors.email }}</span>
+      </label>
+
+      <label>
         Profesión
         <input
           type="text"
@@ -329,6 +353,15 @@ function toggleTech(item) {
 
 function validateForm() {
   fieldErrors.value = {};
+
+  // Nombre
+  if (!form.value.name || form.value.name.trim().length === 0) {
+    fieldErrors.value.name = 'El nombre es obligatorio.';
+  }
+  // Correo
+  if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
+    fieldErrors.value.email = 'El correo no es válido.';
+  }
   // Profesión
   if (!form.value.profession || form.value.profession.trim().length === 0) {
     fieldErrors.value.profession = 'La profesión es obligatoria.';
@@ -355,6 +388,13 @@ function validateForm() {
 async function saveProfile() {
   saving.value = true;
   error.value = '';
+
+  // Validación frontend antes de enviar
+  if (!validateForm()) {
+    saving.value = false;
+    error.value = 'Corrige los campos marcados.';
+    return;
+  }
 
   // Armar tech_stack correctamente antes de enviar
   form.value.tech_stack = techOptions.map(sec => ({

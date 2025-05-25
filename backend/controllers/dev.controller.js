@@ -48,8 +48,27 @@ export const getDeveloperProfile = async (req, res) => {
 
 export const updateDeveloperProfile = async (req, res) => {
   const userId = req.user.id;
-  const { profession, phone, description, years_experience, location, tech_stack, avatar } = req.body;
+  const {
+    name,
+    email,
+    profession,
+    phone,
+    description,
+    years_experience,
+    location,
+    tech_stack,
+    avatar
+  } = req.body;
+  
   try {
+
+    // Actualiza la tabla users
+    await pool.query(
+      `UPDATE users SET name = ?, email = ? WHERE id = ?`,
+      [name, email, userId]
+    );
+
+    // Actualiza la tabla developers
     await pool.query(
       `UPDATE developers
        SET profession      = ?,
@@ -71,19 +90,6 @@ export const updateDeveloperProfile = async (req, res) => {
         userId
       ]
     );
-
-    // Obtener email y nombre del dev
-    const [rows] = await pool.query(
-      `SELECT u.email, u.name FROM users u WHERE u.id = ?`,
-      [userId]
-    );
-    if (rows.length) {
-      await sendMail({
-        to: rows[0].email,
-        subject: 'Perfil publicado en JobsXDevs',
-        html: `<h1>¡Hola ${rows[0].name}!</h1><p>Tu perfil ha sido publicado correctamente.</p><p>Puedes ver tu perfil publicado aquí: <a href="/developers">Ver todos los desarrolladores</a></p>`
-      });
-    }
 
     res.json({ message: 'Developer profile updated' });
   } catch (error) {
