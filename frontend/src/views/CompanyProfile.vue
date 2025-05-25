@@ -291,6 +291,14 @@ function validateCompanyProfile() {
 async function saveProfile() {
   saving.value = true;
   error.value = '';
+
+  // Validación frontend antes de enviar
+  if (!validateCompanyProfile()) {
+    saving.value = false;
+    error.value = 'Corrige los campos marcados.';
+    return;
+  }
+
   try {
     await updateCompanyProfile(form.value)
     alert('Perfil actualizado correctamente.')
