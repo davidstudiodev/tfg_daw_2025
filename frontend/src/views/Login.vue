@@ -22,7 +22,25 @@
         </button>
         <p v-if="error" class="error">{{ error }}</p>
       </form>
-  
+
+
+      <!-- Modal para recuperar contraseña -->
+      <a href="#" @click.prevent="showForgotPassword = true">¿Has olvidado tu contraseña?</a>
+
+      <div v-if="showForgotPassword" class="forgot-password-modal">
+        <form @submit.prevent="sendResetEmail">
+          <label>
+            Email
+            <input v-model="resetEmail" type="email" required />
+          </label>
+          <button type="submit">Enviar enlace de recuperación</button>
+          <p v-if="resetMessage">{{ resetMessage }}</p>
+        </form>
+        <button @click="showForgotPassword = false" class="cancel-btn">Cancelar</button>
+      </div>
+      <!--  -->
+      
+      
       <p>
         No tienes cuenta?
         <router-link :to="{ name: 'register', query: { role } }">
@@ -89,6 +107,27 @@ const submitForm = async () => {
     form.value.password = ''
   }
 }
+
+// Modal para recuperar contraseña
+const showForgotPassword = ref(false)
+const resetEmail = ref('')
+const resetMessage = ref('')
+
+async function sendResetEmail() {
+  resetMessage.value = ''
+  try {
+    await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: resetEmail.value })
+    })
+    resetMessage.value = 'Si el email existe, se enviará un enlace de recuperación.'
+  } catch (e) {
+    resetMessage.value = 'No se pudo enviar el correo. Intenta de nuevo.'
+  }
+}
+
+
 </script>
 
 <style scoped>

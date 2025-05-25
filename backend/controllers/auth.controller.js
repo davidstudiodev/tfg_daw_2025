@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { pool } from '../config/db.js';
 import { createUser, findUserByEmail } from '../models/User.js';
 import { sendMail } from '../utils/mailer.js';
+import crypto from 'crypto';
 
 export const register = async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -124,6 +125,74 @@ export const changePassword = async (req, res) => {
     res.json({ message: 'Contraseña actualizada correctamente.' });
   } catch (error) {
     console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
+
+
+// Envía un enlace de recuperación de contraseña al email del usuario
+export const forgotPassword = async (req, res) => {
+  console.log('forgotPassword endpoint called', req.body);
+  const { email } = req.body;
+  try {
+    // Busca usuario por email (dev o company)
+    const [[user]] = await pool.query('SELECT id, email FROM users WHERE email = ?', [email]);
+    if (!user) return res.status(200).json({ message: 'Si el email existe, se enviará un enlace.' });
+
+    // Genera token y guarda en DB (puedes crear una tabla password_resets)
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
+
+    await pool.query(
+      'INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)',
+      [user.id, token, expires]
+    );
+
+    const resetUrl = `http://localhost:5173/reset-password?token=${token}`;
+
+    await sendMail({
+      to: user.email,
+      subject: 'Recupera tu contraseña',
+      html: `
+        <p>Hola,</p>
+        <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva:</p>
+        <a href="${resetUrl}">${resetUrl}</a>
+        <p>Si no solicitaste este cambio, ignora este correo.</p>
+      `
+    });
+
+    res.json({ message: 'Si el email existe, se enviará un enlace.' });
+  } catch (error) {
+    console.error('Error en forgotPassword:', error, error.response?.data || error.message || error);
+    res.status(500).json({ 
+      message: 'No se pudo enviar el correo. Intenta de nuevo.', 
+      error: error.message || error.toString() 
+    });
+  }
+};
+
+
+// Resetea la contraseña del usuario usando el token enviado por email
+export const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+  try {
+    // Busca el token válido y no expirado
+    const [[reset]] = await pool.query(
+      'SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()',
+      [token]
+    );
+    if (!reset) return res.status(400).json({ message: 'Token inválido o expirado.' });
+
+    // Actualiza la contraseña del usuario
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, reset.user_id]);
+
+    // Elimina el token usado
+    await pool.query('DELETE FROM password_resets WHERE id = ?', [reset.id]);
+
+    res.json({ message: 'Contraseña restablecida correctamente.' });
+  } catch (error) {
+    console.error('Error en resetPassword:', error);
     res.status(500).json({ message: 'Error del servidor.' });
   }
 };

@@ -28,7 +28,12 @@ const routes = [
     meta: { requiresAuth: true, role: 'company' }
   },
   { path: '/offers', name: 'offers', component: Offers },
-  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound }
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('../src/views/ResetPassword.vue')
+  }
 ]
 
 const router = createRouter({

@@ -8,6 +8,13 @@ import validateRequest from '../middlewares/validateRequest.js';
 import { body } from 'express-validator';
 import { changePassword } from '../controllers/auth.controller.js';
 
+// Middleware para recuperar contraseña
+import { forgotPassword } from '../controllers/auth.controller.js';
+
+// Middleware para resetear contraseña
+import { resetPassword } from '../controllers/auth.controller.js';
+
+
 const router = express.Router();
 
 router.post('/register', registerLimiter, register);
@@ -26,6 +33,27 @@ router.put(
   ],
   validateRequest,
   changePassword
+);
+
+
+// Recuperar contraseña
+router.post(
+  '/forgot-password',
+  [body('email').isEmail()],
+  validateRequest,
+  forgotPassword
+);
+
+
+// Resetear contraseña
+router.post(
+  '/reset-password',
+  [
+    body('token').isString().notEmpty(),
+    body('newPassword').isString().isLength({ min: 6 })
+  ],
+  validateRequest,
+  resetPassword
 );
 
 
