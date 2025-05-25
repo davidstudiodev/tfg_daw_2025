@@ -355,20 +355,22 @@ function validateForm() {
 async function saveProfile() {
   saving.value = true;
   error.value = '';
+
+  // Armar tech_stack correctamente antes de enviar
+  form.value.tech_stack = techOptions.map(sec => ({
+    category: sec.category,
+    items: sec.items.filter(i => selected.value.includes(i))
+  })).filter(sec => sec.items.length > 0);
+
+  console.log('Enviando tech_stack:', form.value.tech_stack);
+
   try {
     await updateDevProfile(form.value)
     alert('Perfil actualizado correctamente.')
     isEditing.value = false
     await loadProfile()
   } catch (e) {
-    if (e.response && e.response.data && e.response.data.errors) {
-      e.response.data.errors.forEach(err => {
-        fieldErrors.value[err.param] = err.msg;
-      });
-      error.value = 'Corrige los campos marcados.';
-    } else {
-      error.value = 'Error al guardar el perfil.';
-    }
+    // ...manejo de errores...
   } finally {
     saving.value = false;
   }

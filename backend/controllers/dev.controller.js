@@ -25,7 +25,9 @@ export const getDeveloperProfile = async (req, res) => {
     console.log('Perfil dev antes de parsear:', profile);
 
     // Parse tech_stack safely, default to empty array
-    if (typeof profile.tech_stack === 'string') {
+    if (!profile.tech_stack) {
+      profile.tech_stack = [];
+    } else if (typeof profile.tech_stack === 'string') {
       try {
         profile.tech_stack = JSON.parse(profile.tech_stack);
       } catch {
@@ -64,7 +66,7 @@ export const updateDeveloperProfile = async (req, res) => {
         description,
         years_experience,
         location,
-        JSON.stringify(tech_stack),
+        JSON.stringify(Array.isArray(tech_stack) ? tech_stack : []),
         avatar || '',
         userId
       ]

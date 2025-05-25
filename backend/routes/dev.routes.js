@@ -24,7 +24,18 @@ router.put(
     body('description').isString().isLength({ min: 10 }),
     body('years_experience').isInt({ min: 0 }),
     body('location').isString().notEmpty(),
-    body('tech_stack').isArray(),
+    body('tech_stack')
+      .isArray()
+      .withMessage('tech_stack debe ser un array')
+      .custom(arr =>
+        arr.every(
+          sec =>
+            typeof sec === 'object' &&
+            typeof sec.category === 'string' &&
+            Array.isArray(sec.items)
+        )
+      )
+      .withMessage('Cada elemento de tech_stack debe tener category:string e items:array'),
     body('avatar').optional().isString()
   ],
   validateRequest,
