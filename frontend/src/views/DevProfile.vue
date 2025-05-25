@@ -32,6 +32,9 @@
         <button type="button" @click="startEditing" class="edit-btn">
           Editar datos
         </button>
+        <button type="button" @click="showPasswordModal = true" class="edit-btn">
+          Cambiar contraseña
+        </button>
         <button type="button" @click="handleLogout" class="logout-btn">
           Cerrar sesión
         </button>
@@ -41,8 +44,39 @@
       </div>
     </section>
 
+
+    <!-- Modal para cambiar contraseña -->
+     <div v-if="showPasswordModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Cambiar contraseña</h3>
+        <form @submit.prevent="changePassword">
+          <label>
+            Contraseña actual
+            <input type="password" v-model="passwordForm.current" :class="{ 'input-error': passwordErrors.current }" />
+            <span v-if="passwordErrors.current" class="input-error-message">{{ passwordErrors.current }}</span>
+          </label>
+          <label>
+            Nueva contraseña
+            <input type="password" v-model="passwordForm.new" :class="{ 'input-error': passwordErrors.new }" />
+            <span v-if="passwordErrors.new" class="input-error-message">{{ passwordErrors.new }}</span>
+          </label>
+          <label>
+            Repetir nueva contraseña
+            <input type="password" v-model="passwordForm.repeat" :class="{ 'input-error': passwordErrors.repeat }" />
+            <span v-if="passwordErrors.repeat" class="input-error-message">{{ passwordErrors.repeat }}</span>
+          </label>
+          <div class="actions">
+            <button type="submit" class="save-btn">Guardar</button>
+            <button type="button" @click="showPasswordModal = false" class="cancel-btn">Cancelar</button>
+          </div>
+          <p v-if="passwordChangeSuccess" class="success">{{ passwordChangeSuccess }}</p>
+          <p v-if="passwordChangeError" class="error">{{ passwordChangeError }}</p>
+        </form>
+      </div>
+    </div>
+
     <!-- Formulario de edición -->
-    <form v-else @submit.prevent="saveProfile" class="profile-form">
+    <form v-if="isEditing" @submit.prevent="saveProfile" class="profile-form">
       <label>
         Avatar
         <input
@@ -218,6 +252,11 @@
         </div>
       </div>
     </section>
+
+
+  
+
+
   </div>
 </template>
 
@@ -433,6 +472,39 @@ function goToOffers() {
 function cancelEdit() {
   isEditing.value = false;
   loadProfile(); // Recarga los datos originales
+}
+
+
+const showPasswordModal = ref(false)
+const passwordForm = ref({ current: '', new: '', repeat: '' })
+const passwordErrors = ref({})
+const passwordChangeSuccess = ref('')
+const passwordChangeError = ref('')
+
+function validatePasswordForm() {
+  passwordErrors.value = {}
+  if (!passwordForm.value.current) passwordErrors.value.current = 'Introduce tu contraseña actual.'
+  if (!passwordForm.value.new || passwordForm.value.new.length < 6) passwordErrors.value.new = 'La nueva contraseña debe tener al menos 6 caracteres.'
+  if (passwordForm.value.new !== passwordForm.value.repeat) passwordErrors.value.repeat = 'Las contraseñas no coinciden.'
+  return Object.keys(passwordErrors.value).length === 0
+}
+
+async function changePassword() {
+  passwordChangeSuccess.value = ''
+  passwordChangeError.value = ''
+  if (!validatePasswordForm()) return
+  try {
+    await api.put('/api/auth/change-password', {
+      currentPassword: passwordForm.value.current,
+      newPassword: passwordForm.value.new
+    })
+    passwordChangeSuccess.value = 'Contraseña cambiada correctamente.'
+    alert('¡Contraseña cambiada correctamente!')
+    showPasswordModal.value = false
+    passwordForm.value = { current: '', new: '', repeat: '' }
+  } catch (e) {
+    passwordChangeError.value = e.response?.data?.message || 'Error al cambiar la contraseña.'
+  }
 }
 
 onMounted(() => {

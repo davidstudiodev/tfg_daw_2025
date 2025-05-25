@@ -4,7 +4,7 @@
     <div class="auth-container">
       <h2>Login de {{ roleLabel }}</h2>
   
-      <form @submit.prevent="submitForm" class="auth-form">
+      <form v-if="!showForgotPassword" @submit.prevent="submitForm" class="auth-form">
         <input
           v-model="form.email"
           type="email"
@@ -25,7 +25,7 @@
 
 
       <!-- Modal para recuperar contraseña -->
-      <a href="#" @click.prevent="showForgotPassword = true">¿Has olvidado tu contraseña?</a>
+      <a v-if="!showForgotPassword" href="#" @click.prevent="showForgotPassword = true">¿Has olvidado tu contraseña?</a>
 
       <div v-if="showForgotPassword" class="forgot-password-modal">
         <form @submit.prevent="sendResetEmail">

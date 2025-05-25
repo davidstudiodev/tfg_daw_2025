@@ -566,6 +566,7 @@ async function changePassword() {
       newPassword: passwordForm.value.new
     })
     passwordChangeSuccess.value = 'Contraseña cambiada correctamente.'
+    alert('¡Contraseña cambiada correctamente!') 
     showPasswordModal.value = false
     passwordForm.value = { current: '', new: '', repeat: '' }
   } catch (e) {
