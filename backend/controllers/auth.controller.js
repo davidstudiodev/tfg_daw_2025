@@ -96,3 +96,34 @@ export const logout = (req, res) => {
     .status(200)
     .json({ message: 'Logged out' });
 };
+
+
+// Cambia la contraseña del usuario autenticado
+export const changePassword = async (req, res) => {
+  const userId = req.user.id;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    // 1. Busca el usuario por ID
+    const [[user]] = await pool.query(
+      'SELECT password FROM users WHERE id = ?',
+      [userId]
+    );
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+
+    // 2. Verifica la contraseña actual
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'La contraseña actual no es correcta.' });
+
+    // 3. Hashea la nueva contraseña
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // 4. Actualiza la contraseña
+    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, userId]);
+
+    res.json({ message: 'Contraseña actualizada correctamente.' });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};
