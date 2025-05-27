@@ -15,6 +15,9 @@ import offersRoutes from './routes/offers.routes.js';
 // Import DB connection
 import db from './config/db.js';
 
+// Import admin routes
+import adminRoutes from './routes/admin.routes.js'
+
 dotenv.config();
 const app = express();
 
@@ -39,6 +42,8 @@ app.use('/api/protected', protectedRoutes);
 app.use('/api/dev', devRoutes)
 app.use('/api/company', companyRoutes)
 app.use('/api/offers', offersRoutes)
+
+app.use('/api/admin', adminRoutes)
 
 // 404 handler
 app.use((req, res) => {

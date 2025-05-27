@@ -6,33 +6,47 @@ import DevProfile from '../src/views/DevProfile.vue'
 import CompanyProfile from '../src/views/CompanyProfile.vue'
 import NotFound from '../src/views/NotFound.vue'
 import Offers from '../src/views/Offers.vue'
+import AdminLogin from '../src/views/AdminLogin.vue'
+import AdminProfile from '../src/views/AdminProfile.vue'
 
 import { getMe } from '../src/services/auth.js' // obtenemos el usuario desde la cookie HttpOnly
 
 const routes = [
-  { path: '/', name: 'home', component: Home },
+  { path: '/', 
+    name: 'home', 
+    component: Home },
   { 
-    path: '/login', name: 'login', component: Login, 
+    path: '/login', 
+    name: 'login', 
+    component: Login, 
     props: route => ({ role: route.query.role })
   },
   { 
-    path: '/register', name: 'register', component: Register, 
+    path: '/register', 
+    name: 'register', 
+    component: Register, 
     props: route => ({ role: route.query.role })
   },
   {
-    path: '/dev/profile', name: 'dev-profile', component: DevProfile,
+    path: '/dev/profile', 
+    name: 'dev-profile', 
+    component: DevProfile,
     meta: { requiresAuth: true, role: 'dev' }
   },
   {
-    path: '/company/profile', name: 'company-profile', component: CompanyProfile,
+    path: '/company/profile', 
+    name: 'company-profile', 
+    component: CompanyProfile,
     meta: { requiresAuth: true, role: 'company' }
   },
   { 
     path: '/offers', 
-    name: 'offers', component: Offers 
+    name: 'offers', 
+    component: Offers 
   },
   { path: '/:pathMatch(.*)*', 
-    name: 'not-found', component: NotFound 
+    name: 'not-found', 
+    component: NotFound 
   },
   {
     path: '/developers',
@@ -43,6 +57,17 @@ const routes = [
     path: '/reset-password',
     name: 'ResetPassword',
     component: () => import('../src/views/ResetPassword.vue')
+  },
+  {
+    path: '/admin/login',
+    name: 'admin-login',
+    component: AdminLogin
+  },
+  {
+    path: '/admin/profile',
+    name: 'admin-profile',
+    component: AdminProfile,
+    meta: { requiresAuth: true, role: 'admin' }
   }
 ]
 
