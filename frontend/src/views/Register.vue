@@ -22,7 +22,12 @@
           type="password"
           placeholder="Contraseña"
           required
+          :class="{ 'input-error': passwordError }"
+          @input="validatePassword"
         />
+        <small class="info">Debe tener al menos 8 caracteres, una mayúscula y un número.</small>
+
+        <p v-if="passwordError" class="error">{{ passwordError }}</p>
         <button type="submit" :disabled="loading">
           {{ loading ? 'Registrando…' : 'Registrarse' }}
         </button>
@@ -61,10 +66,27 @@ const roleLabel = computed(() =>
 const form = ref({ name: '', email: '', password: '' })
 const loading = ref(false)
 const error = ref('')
+const passwordError = ref('')
+
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/
+
+function validatePassword() {
+  if (!passwordRegex.test(form.value.password)) {
+    passwordError.value = 'La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.'
+    return false
+  }
+  passwordError.value = ''
+  return true
+}
 
 const submitForm = async () => {
   loading.value = true
   error.value = ''
+
+   if (!validatePassword()) {
+    loading.value = false
+    return
+  }
 
   try {
     // 5) Llamada al service en lugar de axios directamente
@@ -74,6 +96,8 @@ const submitForm = async () => {
       password: form.value.password,
       role: role.value
     })
+
+    alert('¡Te has registrado! Ahora puedes iniciar sesión.')
 
     // 6) Redirigir tras registro correcto
     router.push({ name: 'login', query: { role: role.value } })
@@ -122,4 +146,18 @@ const submitForm = async () => {
   margin-top: 0.5rem;
   font-size: 0.9rem;
 }
+
+.auth-form input.input-error {
+  border: 1.5px solid #c00;
+  background: #fff6f6;
+}
+.info {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+
 </style>

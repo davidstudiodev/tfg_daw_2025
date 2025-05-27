@@ -59,7 +59,7 @@ const routes = [
     component: () => import('../src/views/ResetPassword.vue')
   },
   {
-    path: '/admin/login',
+    path: '/admin',
     name: 'admin-login',
     component: AdminLogin
   },

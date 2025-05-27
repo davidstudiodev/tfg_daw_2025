@@ -47,7 +47,7 @@
 
 
     <!-- Modal para cambiar contraseña -->
-     <div v-if="showPasswordModal" class="modal-overlay">
+    <div v-if="showPasswordModal" class="modal-overlay">
       <div class="modal-content">
         <h3>Cambiar contraseña</h3>
         <form @submit.prevent="changePassword">
@@ -58,7 +58,13 @@
           </label>
           <label>
             Nueva contraseña
-            <input type="password" v-model="passwordForm.new" :class="{ 'input-error': passwordErrors.new }" />
+            <input
+              type="password"
+              v-model="passwordForm.new"
+              :class="{ 'input-error': passwordErrors.new }"
+              @input="validatePasswordForm"
+            />
+            <small class="info">Debe tener al menos 8 caracteres, una mayúscula y un número.</small>
             <span v-if="passwordErrors.new" class="input-error-message">{{ passwordErrors.new }}</span>
           </label>
           <label>
@@ -483,11 +489,16 @@ const passwordErrors = ref({})
 const passwordChangeSuccess = ref('')
 const passwordChangeError = ref('')
 
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/
+
 function validatePasswordForm() {
   passwordErrors.value = {}
   if (!passwordForm.value.current) passwordErrors.value.current = 'Introduce tu contraseña actual.'
-  if (!passwordForm.value.new || passwordForm.value.new.length < 6) passwordErrors.value.new = 'La nueva contraseña debe tener al menos 6 caracteres.'
-  if (passwordForm.value.new !== passwordForm.value.repeat) passwordErrors.value.repeat = 'Las contraseñas no coinciden.'
+  if (!passwordForm.value.new) passwordErrors.value.new = 'Introduce la nueva contraseña.'
+  else if (!passwordRegex.test(passwordForm.value.new))
+    passwordErrors.value.new = 'Debe tener al menos 8 caracteres, una mayúscula y un número.'
+  if (passwordForm.value.new !== passwordForm.value.repeat)
+    passwordErrors.value.repeat = 'Las contraseñas no coinciden.'
   return Object.keys(passwordErrors.value).length === 0
 }
 
