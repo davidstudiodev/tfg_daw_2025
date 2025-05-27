@@ -1,5 +1,6 @@
 <template>
   <div class="profile-container">
+    <AppLogo @click="$router.push('/')" style="cursor:pointer; position:absolute; top:24px; left:24px; z-index:1100;" />
     <h1>Perfil de Developer</h1>
 
     <!-- Notificaciones -->
@@ -267,6 +268,7 @@ import { logout } from '../services/auth.js';
 import { getDevProfile, updateDevProfile } from '../services/profile.js';
 import { techOptions } from '../constants/techOptions.js';
 import api from '../services/api.js';
+import AppLogo from '../components/AppLogo.vue'
 
 const router = useRouter();
 const loading = ref(true);
@@ -667,4 +669,22 @@ onMounted(() => {
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  min-width: 300px;
+}
+
+
 </style>

@@ -27,8 +27,18 @@ const routes = [
     path: '/company/profile', name: 'company-profile', component: CompanyProfile,
     meta: { requiresAuth: true, role: 'company' }
   },
-  { path: '/offers', name: 'offers', component: Offers },
-  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
+  { 
+    path: '/offers', 
+    name: 'offers', component: Offers 
+  },
+  { path: '/:pathMatch(.*)*', 
+    name: 'not-found', component: NotFound 
+  },
+  {
+    path: '/developers',
+    name: 'developers',
+    component: () => import('../src/views/Developers.vue')
+  },
   {
     path: '/reset-password',
     name: 'ResetPassword',

@@ -1,5 +1,6 @@
 <template>
   <div class="profile-container">
+    <AppLogo @click="$router.push('/')" style="cursor:pointer; position:absolute; top:24px; left:24px; z-index:1100;" />
     <h1>Perfil de Empresa</h1>
 
     <!-- Notificaciones -->
@@ -241,6 +242,7 @@ import { getCompanyProfile, updateCompanyProfile, createJob } from '../services/
 import { techOptions } from '../constants/techOptions.js'
 import { getCompanyJobs, updateJob, deleteJob } from '../services/profile.js'
 import api from '../services/api.js';
+import AppLogo from '../components/AppLogo.vue'
 
 const router = useRouter()
 const loading = ref(true)

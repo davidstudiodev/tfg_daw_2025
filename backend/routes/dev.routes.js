@@ -3,11 +3,9 @@ import express from 'express'
 import authMiddleware from '../middlewares/auth.middleware.js'
 import validateRequest from '../middlewares/validateRequest.js'
 import { body } from 'express-validator'
-import {
-  getDeveloperProfile,
-  updateDeveloperProfile,
-  getDevApplications
-} from '../controllers/dev.controller.js'
+import { getDeveloperProfile, updateDeveloperProfile, getDevApplications } from '../controllers/dev.controller.js'
+
+import { listDevelopers } from '../controllers/dev.controller.js';
 
 const router = express.Router()
 
@@ -46,5 +44,8 @@ router.put(
 
 // Ver aplicaciones del dev
 router.get('/applications', authMiddleware, getDevApplications)
+
+// Listar todos los desarrolladores
+router.get('/all', listDevelopers);
 
 export default router

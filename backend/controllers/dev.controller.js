@@ -123,3 +123,28 @@ export const getDevApplications = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Listar todos los developers
+export const listDevelopers = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT 
+        u.id, u.name, u.email, d.avatar, d.profession, d.description, 
+        d.years_experience, d.location, d.tech_stack
+       FROM users u
+       JOIN developers d ON d.user_id = u.id
+       ORDER BY u.name ASC`
+    );
+    // Parsear tech_stack si es string
+    const developers = rows.map(dev => ({
+      ...dev,
+      tech_stack: typeof dev.tech_stack === 'string'
+        ? JSON.parse(dev.tech_stack)
+        : (dev.tech_stack || [])
+    }));
+    res.json(developers);
+  } catch (error) {
+    console.error('Error listando developers:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+};

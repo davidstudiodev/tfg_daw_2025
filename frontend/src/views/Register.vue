@@ -39,9 +39,7 @@
 </template>
 
 <script setup>
-// 1) Quitar: import axios y configuración de baseURL
-// import axios from 'axios'
-// axios.defaults.baseURL = import.meta.env.VITE_API_URL
+
 
 // 2) Importar solo lo que necesitamos de los servicios
 import { ref, computed } from 'vue'

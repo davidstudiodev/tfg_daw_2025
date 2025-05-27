@@ -16,6 +16,7 @@
       </div>
       <div class="auth-buttons" v-else>
         <button @click="goToProfile">Ir a mi perfil</button>
+        <button v-if="isLoggedIn" @click="handleLogout">Cerrar sesión</button>
       </div>
     </header>
 
@@ -36,13 +37,20 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AppLogo from '../components/AppLogo.vue';
-import { getMe } from '../services/auth.js';
+import { logout, getMe } from '../services/auth.js';
 
 const isCompany = ref(false);
 const router = useRouter();
 
 const isLoggedIn = ref(false);
 const userRole = ref('');
+
+getMe().then(() => isLoggedIn.value = true).catch(() => isLoggedIn.value = false)
+
+async function handleLogout() {
+  await logout()
+  router.push({ name: 'login' })
+}
 
 const goTo = (type) => {
   router.push({ name: type, query: { role: isCompany.value ? 'company' : 'developer' } });
