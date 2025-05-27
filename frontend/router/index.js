@@ -52,15 +52,33 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if (!to.meta.requiresAuth) return next()
 
-  try {
-    const { data: user } = await getMe()
-    if (user.role !== to.meta.role) throw new Error('Unauthorized role')
-    next()
-  } catch {
-    next({ name: 'login', query: { role: to.meta.role } })
+  // Si el usuario está autenticado y va a una ruta de login o register, redirigir según su rol
+  if (['login', 'register'].includes(to.name)) {
+    try {
+      const { data: user } = await getMe()
+      if (user.role === 'dev') return next({ name: 'dev-profile' })
+      if (user.role === 'company') return next({ name: 'company-profile' })
+    } catch {
+      // No autenticado, puede ir a login/register
+      return next()
+    }
+    return next()
   }
+
+  // Si la ruta requiere autenticación, verificar el rol del usuario
+  if (to.meta.requiresAuth) {
+    try {
+      const { data: user } = await getMe()
+      if (user.role !== to.meta.role) throw new Error('Unauthorized role')
+      return next()
+    } catch {
+      return next({ name: 'login', query: { role: to.meta.role } })
+    }
+  }
+
+  // Para el resto de rutas públicas
+  return next()
 })
 
 export default router

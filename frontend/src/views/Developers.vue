@@ -22,7 +22,7 @@
     <div v-if="loading">Cargando...</div>
     <div v-else-if="developers.length === 0">No hay developers registrados.</div>
     <div class="dev-cards">
-      <div v-for="dev in paginatedDevelopers" :key="dev.id" class="dev-card">
+      <div v-for="dev in developers" :key="dev.id" class="dev-card">
         <img v-if="dev.avatar" :src="dev.avatar" alt="Avatar" class="avatar" />
         <div class="dev-info">
           <h2>{{ dev.name }}</h2>
@@ -82,44 +82,57 @@ const filterName = ref('')
 const filterProfession = ref('')
 const filterLocation = ref('')
 
-const filteredDevelopers = computed(() => {
-  return developers.value.filter(dev =>
-    (!filterName.value || dev.name.toLowerCase().includes(filterName.value.toLowerCase())) &&
-    (!filterProfession.value || (dev.profession || '').toLowerCase().includes(filterProfession.value.toLowerCase())) &&
-    (!filterLocation.value || (dev.location || '').toLowerCase().includes(filterLocation.value.toLowerCase()))
-  )
-})
+const totalPages = ref(1)
+const totalDevelopers = ref(0)
 
-const totalPages = computed(() =>
-  Math.ceil(filteredDevelopers.value.length / perPage)
-)
 
-const paginatedDevelopers = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  return filteredDevelopers.value.slice(start, start + perPage)
-})
-
-function goToPage(page) {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
+async function loadDevelopers() {
+  loading.value = true
+  try {
+    const { data } = await api.get('/api/dev/all', {
+      params: {
+        page: currentPage.value,
+        limit: perPage,
+        name: filterName.value,
+        profession: filterProfession.value,
+        location: filterLocation.value
+      }
+    })
+    developers.value = data.developers
+    totalPages.value = data.totalPages
+    totalDevelopers.value = data.total
+  } catch {
+    developers.value = []
+    totalPages.value = 1
+    totalDevelopers.value = 0
+  } finally {
+    loading.value = false
   }
 }
+
+import { watch } from 'vue'
+
+watch([filterName, filterProfession, filterLocation], () => {
+  currentPage.value = 1
+  loadDevelopers()
+})
+
 
 function goToProfile() {
   if (userRole.value === 'dev') router.push({ name: 'dev-profile' })
   else if (userRole.value === 'company') router.push({ name: 'company-profile' })
 }
 
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+    loadDevelopers()
+  }
+}
+
 onMounted(async () => {
-    await checkAuth()
-    try {
-        const { data } = await api.get('/api/dev/all')
-        developers.value = data
-    } catch {
-        developers.value = []
-    } finally {
-        loading.value = false
-    }
+  await checkAuth()
+  await loadDevelopers()
 })
 
 </script>

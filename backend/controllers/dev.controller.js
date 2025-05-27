@@ -1,6 +1,5 @@
 // controllers/dev.controller.js
 import { pool } from '../config/db.js';
-import { sendMail } from '../utils/mailer.js';
 
 export const getDeveloperProfile = async (req, res) => {
   const userId = req.user.id;
@@ -127,22 +126,66 @@ export const getDevApplications = async (req, res) => {
 // Listar todos los developers
 export const listDevelopers = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 6
+    const offset = (page - 1) * limit
+
+    // Filtros
+    const name = req.query.name || ''
+    const profession = req.query.profession || ''
+    const location = req.query.location || ''
+
+    let where = 'WHERE 1=1'
+    let params = []
+
+    if (name) {
+      where += ' AND u.name LIKE ?'
+      params.push(`%${name}%`)
+    }
+    if (profession) {
+      where += ' AND d.profession LIKE ?'
+      params.push(`%${profession}%`)
+    }
+    if (location) {
+      where += ' AND d.location LIKE ?'
+      params.push(`%${location}%`)
+    }
+
+    // Total filtrado
+    const [[{ total }]] = await pool.query(
+      `SELECT COUNT(*) as total
+       FROM users u
+       JOIN developers d ON d.user_id = u.id
+       ${where}`,
+      params
+    );
+
+    // Developers filtrados y paginados
     const [rows] = await pool.query(
       `SELECT 
         u.id, u.name, u.email, d.avatar, d.profession, d.description, 
         d.years_experience, d.location, d.tech_stack
        FROM users u
        JOIN developers d ON d.user_id = u.id
-       ORDER BY u.name ASC`
+       ${where}
+       ORDER BY u.name ASC
+       LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
     );
-    // Parsear tech_stack si es string
+
     const developers = rows.map(dev => ({
       ...dev,
       tech_stack: typeof dev.tech_stack === 'string'
         ? JSON.parse(dev.tech_stack)
         : (dev.tech_stack || [])
     }));
-    res.json(developers);
+
+    res.json({
+      developers,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    });
   } catch (error) {
     console.error('Error listando developers:', error);
     res.status(500).json({ message: 'Error del servidor.' });
