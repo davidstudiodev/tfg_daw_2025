@@ -1,6 +1,6 @@
 <template>
   <div class="logo" @click="goHome" style="cursor:pointer">
-    jobsxdevs
+    <img src="/logo_white.svg" alt="Logo" />
   </div>
 </template>
 

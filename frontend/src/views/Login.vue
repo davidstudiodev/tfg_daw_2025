@@ -2,45 +2,56 @@
   <div class="login-page">
     <AppLogo />
     <div class="auth-container">
-      <h2>Login de {{ roleLabel }}</h2>
+      <h2>Login</h2>
+      <h3>¡Bienvenido/a {{ roleLabel }}!</h3>
   
       <form v-if="!showForgotPassword" @submit.prevent="submitForm" class="auth-form">
-        <input
-          v-model="form.email"
-          type="email"
-          placeholder="Email"
-          required
-        />
-        <input
-          v-model="form.password"
-          type="password"
-          placeholder="Contraseña"
-          required
-        />
+        Correo electrónico
+        <div class="input-icon">
+          <span class="material-icons-outlined">email</span>
+          <input
+            v-model="form.email"
+            type="email"
+            placeholder="example@example.com"
+            required
+          />
+        </div>
+        Contraseña
+        <div class="input-icon">
+          <span class="material-icons-outlined">lock</span>
+          <input
+            v-model="form.password"
+            type="password"
+            placeholder="*********"
+            required
+          />
+        </div>
+        <!-- Modal para recuperar contraseña -->
+        <a v-if="!showForgotPassword" href="#" @click.prevent="showForgotPassword = true">¿Has olvidado tu contraseña?</a>
+        
         <button type="submit" :disabled="loading">
-          {{ loading ? 'Validando…' : 'Entrar' }}
+          {{ loading ? 'Validando…' : 'LOGIN' }}
         </button>
         <p v-if="error" class="error">{{ error }}</p>
       </form>
 
-
-      <!-- Modal para recuperar contraseña -->
-      <a v-if="!showForgotPassword" href="#" @click.prevent="showForgotPassword = true">¿Has olvidado tu contraseña?</a>
-
+    
       <div v-if="showForgotPassword" class="forgot-password-modal">
         <form @submit.prevent="sendResetEmail">
-          <label>
-            Email
-            <input v-model="resetEmail" type="email" required />
+          <label>  
+            Ingresa tu correo electrónico
+            <div class="input-icon">
+              <span class="material-icons-outlined">mail</span>
+              <input v-model="resetEmail" type="email" required />
+            </div>
           </label>
-          <button type="submit">Enviar enlace de recuperación</button>
+          <button type="submit">RECUPERAR</button>
           <p v-if="resetMessage">{{ resetMessage }}</p>
         </form>
-        <button @click="showForgotPassword = false" class="cancel-btn">Cancelar</button>
+        <button @click="showForgotPassword = false" class="cancel-btn">CANCELAR</button>
       </div>
+      
       <!--  -->
-      
-      
       <p>
         No tienes cuenta?
         <router-link :to="{ name: 'register', query: { role } }">
@@ -130,27 +141,73 @@ async function sendResetEmail() {
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+
+.login-page {
+  padding: 20px;
+  height: 100vh;
+}
+
 .auth-container {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  max-width: 450px;
+  margin: 0rem auto 0 auto;
+  padding: 2rem 2rem 2.5rem 2rem;
+  background: var(--black);
+  border-radius: 24px;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  h2 {
+    margin-bottom: 1rem;
+    font-size: 50px;
+    font-weight: 400;
+  }
+  h3 {
+    color: var(--green-light);
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 4rem;
+    margin-top: 0px;
+  }
 }
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
+  width: 100%;
 }
 .auth-form input {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   font-size: 1rem;
+  border-radius: 50px;
+  border: 1px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  outline: none;
+  transition: border 0.2s;
+}
+
+.auth-form input:focus {
+  border: 1.5px solid var(--green-light);
 }
 .auth-form button {
-  padding: 0.75rem;
-  font-size: 1rem;
+  margin-top: 40px;
+  background: var(--green-light);
+  color: var(--black);
+  width: 100%;
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  font-size: 14px;
+  font-weight: 400;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  &:hover {
+    border: 1px solid var(--green-light);
+    background: var(--green-dark);
+    color: var(--white);
+  }
 }
 .auth-form button[disabled] {
   opacity: 0.6;
@@ -161,4 +218,119 @@ async function sendResetEmail() {
   margin-top: 0.5rem;
   font-size: 0.9rem;
 }
+
+.input-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.input-icon .material-icons-outlined {
+  position: absolute;
+  left: 16px;
+  color: var(--green-light);
+  font-size: 22px;
+  pointer-events: none;
+}
+
+.input-icon input {
+  padding-left: 44px;
+  width: 100%;
+}
+
+.forgot-password-modal {
+  color: var(--white);
+  margin-top: 1.5rem;
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  input {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 50px;
+    border: 1px solid var(--white);
+    background: transparent;
+    color: var(--white);
+    outline: none;
+    transition: border 0.2s;
+    margin-top: 10px;
+  }
+  input:focus {
+    border: 1px solid var(--green-light);
+  }
+
+  button[type="submit"] {
+    margin-top: 1rem;
+    background: var(--green-light);
+    color: var(--black);
+    width: 100%;
+    border: 1px solid var(--green-light);
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    &:hover {
+      background: var(--green-dark);
+      color: var(--green-light);
+    }
+  }
+
+  
+  .cancel-btn {
+    width: 100%;
+    margin-top: 1rem;
+    background: transparent;
+    color: var(--green-light);
+    border: 1px solid var(--green-light);
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    &:hover {
+      background: var(--green-light);
+      color: var(--black);
+    }
+  }
+
+  p {
+    margin-top: 1rem;
+    color: var(--green-light);
+    text-align: center;
+  }
+}
+
+.forgot-password-modal .input-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.forgot-password-modal .material-icons-outlined {
+  position: absolute;
+  left: 16px;
+  top: 55%;
+  transform: translateY(-50%);
+  color: var(--green-light);
+  font-size: 22px;
+  pointer-events: none;
+}
+
+.forgot-password-modal input {
+  padding-left: 44px;
+  width: 100%;
+}
+
 </style>
