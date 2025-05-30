@@ -1,12 +1,58 @@
 <template>
   <div class="profile-container">
     <AppLogo @click="$router.push('/')" style="cursor:pointer; position:absolute; top:24px; left:24px; z-index:1100;" />
+    <button type="button" @click="handleLogout" class="logout-btn">
+      <span class="material-icons-outlined">logout</span>
+      Cerrar sesión
+    </button>
     <h1>Perfil de Empresa</h1>
 
     <!-- Notificaciones -->
     <p v-if="error" class="error">{{ error }}</p>
 
     <div v-if="loading">Cargando perfil…</div>
+
+    <!-- Resumen de perfil -->
+    <section v-else class="profile-summary">
+      <div class="profile-info">
+        <div class="profile-resume">
+          <div class="profile-avatar">
+            <img
+              v-if="form.avatar"
+              :src="form.avatar"
+              alt="Avatar"
+              class="avatar-preview"
+            />
+          </div>
+          <div class="profile-data">
+            <h2>{{ form.name }}</h2>
+            <p><span class="material-icons-outlined">email</span> {{ form.email }}</p>
+            <p><span class="material-icons-outlined">call</span> {{ form.phone }}</p>
+            <p><span class="material-icons-outlined">location_on</span> {{ form.location }}</p>
+          </div>
+        </div>
+        <div class="profile-details">
+          <p><span class="material-icons-outlined">business</span><strong>Descripción:</strong> {{ form.description }}</p>
+        </div>
+      </div>
+
+      <hr class="profile-actions-separator" />
+
+      <div class="actions">
+        <button @click="startEditingProfile" class="edit-btn">
+          <span class="material-icons-outlined">edit</span>
+          Editar perfil
+        </button>
+        <button type="button" @click="showPasswordModal = true" class="edit-btn">
+          <span class="material-icons-outlined">lock_reset</span>
+          Cambiar contraseña
+        </button>
+        <button @click="startCreatingJob" class="create-job-btn">
+          <span class="material-icons-outlined">add_circle</span>
+          Crear oferta
+        </button>
+      </div>
+    </section>
 
     <!-- Formulario de edición de perfil -->
     <form v-if="isEditingProfile" @submit.prevent="saveProfile" class="profile-form">
@@ -15,26 +61,34 @@
         <input type="file" accept="image/*" @change="handleAvatarChange" />
       </label>
       <img v-if="form.avatar" :src="form.avatar" alt="Vista previa" class="avatar-preview" />
-      <label>Nombre
-        <input v-model="form.name" :class="{ 'input-error': fieldErrors.name }" required />
-        <span v-if="fieldErrors.name" class="input-error-message">{{ fieldErrors.name }}</span>
-      </label>
-      <label>Correo
-        <input v-model="form.email" :class="{ 'input-error': fieldErrors.email }" required />
-        <span v-if="fieldErrors.email" class="input-error-message">{{ fieldErrors.email }}</span>
-      </label>
-      <label>Ubicación
-        <input v-model="form.location" :class="{ 'input-error': fieldErrors.location }" required />
-        <span v-if="fieldErrors.location" class="input-error-message">{{ fieldErrors.location }}</span>
-      </label>
-      <label>Teléfono
-        <input v-model="form.phone" :class="{ 'input-error': fieldErrors.phone }" required />
-        <span v-if="fieldErrors.phone" class="input-error-message">{{ fieldErrors.phone }}</span>
-      </label>
+
+      <div class="form-row">
+        <label>Nombre
+          <input v-model="form.name" :class="{ 'input-error': fieldErrors.name }" required />
+          <span v-if="fieldErrors.name" class="input-error-message">{{ fieldErrors.name }}</span>
+        </label>
+        <label>Correo
+          <input v-model="form.email" :class="{ 'input-error': fieldErrors.email }" required />
+          <span v-if="fieldErrors.email" class="input-error-message">{{ fieldErrors.email }}</span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label>Ubicación
+          <input v-model="form.location" :class="{ 'input-error': fieldErrors.location }" required />
+          <span v-if="fieldErrors.location" class="input-error-message">{{ fieldErrors.location }}</span>
+        </label>
+        <label>Teléfono
+          <input v-model="form.phone" :class="{ 'input-error': fieldErrors.phone }" required />
+          <span v-if="fieldErrors.phone" class="input-error-message">{{ fieldErrors.phone }}</span>
+        </label>
+      </div>
+
       <label>Descripción
         <textarea v-model="form.description" rows="3" :class="{ 'input-error': fieldErrors.description }" required />
         <span v-if="fieldErrors.description" class="input-error-message">{{ fieldErrors.description }}</span>
       </label>
+
       <div class="actions">
         <button type="submit" class="save-btn">Guardar</button>
         <button type="button" @click="cancelEditProfile" class="cancel-btn">Cancelar</button>
@@ -44,39 +98,47 @@
     <!-- Formulario de creación de oferta -->
     <form v-else-if="isCreatingJob" @submit.prevent="publishJob" class="job-form">
       <h2>Crear nueva oferta</h2>
-      <label>
-        Puesto
-        <textarea v-model="job.puesto" :class="{ 'input-error': fieldErrors.puesto }" maxlength="20" required />
-        <span v-if="fieldErrors.puesto" class="input-error-message">{{ fieldErrors.puesto }}</span>
-      </label>
-      <label>
-        Sector
-        <input v-model="job.sector" :class="{ 'input-error': fieldErrors.sector }" required />
-        <span v-if="fieldErrors.sector" class="input-error-message">{{ fieldErrors.sector }}</span>
-      </label>
-      <label>
-        Salario
-        <input v-model="job.salary" :class="{ 'input-error': fieldErrors.salary }" required />
-        <span v-if="fieldErrors.salary" class="input-error-message">{{ fieldErrors.salary }}</span>
-      </label>
-      <label>
-        Tipo de trabajo
-        <select v-model="job.work_mode" :class="{ 'input-error': fieldErrors.work_mode }" required>
-          <option value="remoto">Remoto</option>
-          <option value="hibrido">Híbrido</option>
-          <option value="local">Local</option>
-        </select>
-        <span v-if="fieldErrors.work_mode" class="input-error-message">{{ fieldErrors.work_mode }}</span>
-      </label>
-      <label>
-        Tipo de jornada
-        <select v-model="job.work_time" :class="{ 'input-error': fieldErrors.work_time }" required>
-          <option value="completa">Completa</option>
-          <option value="parcial">Parcial</option>
-          <option value="practicas">Prácticas</option>
-        </select>
-        <span v-if="fieldErrors.work_time" class="input-error-message">{{ fieldErrors.work_time }}</span>
-      </label>
+      <div class="form-row">
+        <label>
+          Puesto
+          <textarea v-model="job.puesto" :class="{ 'input-error': fieldErrors.puesto }" maxlength="20" required />
+          <span v-if="fieldErrors.puesto" class="input-error-message">{{ fieldErrors.puesto }}</span>
+        </label>
+        <label>
+          Sector
+          <input v-model="job.sector" :class="{ 'input-error': fieldErrors.sector }" required />
+          <span v-if="fieldErrors.sector" class="input-error-message">{{ fieldErrors.sector }}</span>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          Salario
+          <input v-model="job.salary" :class="{ 'input-error': fieldErrors.salary }" required />
+          <span v-if="fieldErrors.salary" class="input-error-message">{{ fieldErrors.salary }}</span>
+        </label>
+        <label>
+          Tipo de trabajo
+          <select v-model="job.work_mode" :class="{ 'input-error': fieldErrors.work_mode }" required>
+            <option value="remoto">Remoto</option>
+            <option value="hibrido">Híbrido</option>
+            <option value="local">Local</option>
+          </select>
+          <span v-if="fieldErrors.work_mode" class="input-error-message">{{ fieldErrors.work_mode }}</span>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          Tipo de jornada
+          <select v-model="job.work_time" :class="{ 'input-error': fieldErrors.work_time }" required>
+            <option value="completa">Completa</option>
+            <option value="parcial">Parcial</option>
+            <option value="practicas">Prácticas</option>
+          </select>
+          <span v-if="fieldErrors.work_time" class="input-error-message">{{ fieldErrors.work_time }}</span>
+        </label>
+      </div>
+
+      <h3>Selecciona tecnologías requeridas</h3>
       <div v-for="section in techOptions" :key="section.category" class="tech-section">
         <h3>{{ section.category }}</h3>
         <div class="tech-buttons">
@@ -90,137 +152,187 @@
             {{ item }}
           </button>
         </div>
-        <span v-if="fieldErrors.tech_stack" class="input-error-message">{{ fieldErrors.tech_stack }}</span>
       </div>
+      <span v-if="fieldErrors.tech_stack" class="input-error-message">{{ fieldErrors.tech_stack }}</span>
+
       <div class="actions">
         <button type="submit" class="publish-btn">Publicar oferta</button>
         <button type="button" @click="cancelJob" class="cancel-btn">Cancelar</button>
       </div>
     </form>
 
-    <!-- Resumen de perfil -->
-    <section v-else class="profile-summary">
-      <img v-if="form.avatar" :src="form.avatar" alt="Avatar" class="avatar-preview" />
-      <p><strong>Nombre:</strong> {{ form.name }}</p>
-      <p><strong>Correo:</strong> {{ form.email }}</p>
-      <p><strong>Ubicación:</strong> {{ form.location }}</p>
-      <p><strong>Teléfono:</strong> {{ form.phone }}</p>
-      <p><strong>Descripción:</strong> {{ form.description }}</p>
-      <div class="actions">
-        <button @click="startEditingProfile" class="edit-btn">Editar perfil</button>
-        <button type="button" @click="showPasswordModal = true" class="edit-btn">Cambiar contraseña</button>
-        <button @click="startCreatingJob" class="create-job-btn">Crear oferta</button>
-        <button @click="handleLogout" class="logout-btn">Cerrar sesión</button>
+    <!-- Formulario de edición de oferta -->
+    <form v-else-if="editingJobId" @submit.prevent="saveEditJob" class="job-form">
+      <h2>Editar oferta</h2>
+      <label>
+        Puesto
+        <textarea v-model="jobEdit.puesto" :class="{ 'input-error': fieldErrors.puesto }" maxlength="20" required />
+        <span v-if="fieldErrors.puesto" class="input-error-message">{{ fieldErrors.puesto }}</span>
+      </label>
+      <label>
+        Sector
+        <input v-model="jobEdit.sector" :class="{ 'input-error': fieldErrors.sector }" required />
+        <span v-if="fieldErrors.sector" class="input-error-message">{{ fieldErrors.sector }}</span>
+      </label>
+      <label>
+        Salario
+        <input v-model="jobEdit.salary" :class="{ 'input-error': fieldErrors.salary }" required />
+        <span v-if="fieldErrors.salary" class="input-error-message">{{ fieldErrors.salary }}</span>
+      </label>
+      <label>
+        Tipo de trabajo
+        <select v-model="jobEdit.work_mode" :class="{ 'input-error': fieldErrors.work_mode }" required>
+          <option value="remoto">Remoto</option>
+          <option value="hibrido">Híbrido</option>
+          <option value="local">Local</option>
+        </select>
+        <span v-if="fieldErrors.work_mode" class="input-error-message">{{ fieldErrors.work_mode }}</span>
+      </label>
+      <label>
+        Tipo de jornada
+        <select v-model="jobEdit.work_time" :class="{ 'input-error': fieldErrors.work_time }" required>
+          <option value="completa">Completa</option>
+          <option value="parcial">Parcial</option>
+          <option value="practicas">Prácticas</option>
+        </select>
+        <span v-if="fieldErrors.work_time" class="input-error-message">{{ fieldErrors.work_time }}</span>
+      </label>
+      <div v-for="section in techOptions" :key="section.category" class="tech-section">
+        <h3>{{ section.category }}</h3>
+        <div class="tech-buttons">
+          <button
+            v-for="item in section.items"
+            :key="item"
+            type="button"
+            :class="{ selected: jobEditSelected.includes(item) }"
+            @click="toggleEditJobTech(item)"
+          >
+            {{ item }}
+          </button>
+        </div>
       </div>
-    </section>
+      <div class="actions">
+        <button type="submit" class="save-btn">Guardar</button>
+        <button type="button" @click="cancelEditJob" class="cancel-btn">Cancelar</button>
+      </div>
+    </form>
 
     <!-- Resumen de ofertas -->
-    <section v-if="jobs.length" class="company-jobs">
-      <h2>Ofertas publicadas</h2>
-      <div v-for="job in jobs" :key="job.id" class="job-card">
-        <div v-if="editingJobId !== job.id">
-          <p><strong>Puesto:</strong> {{ job.puesto }}</p>
-          <p><strong>Sector:</strong> {{ job.sector }}</p>
-          <p><strong>Salario:</strong> {{ job.salary }}</p>
-          <p><strong>Tipo de trabajo:</strong> {{ job.work_mode }}</p>
-          <p><strong>Jornada:</strong> {{ job.work_time }}</p>
-          <p>
-            <strong>Tecnologías:</strong>
-            <span v-if="job.tech_stack && job.tech_stack.length">
-              {{ job.tech_stack.flatMap(sec => sec.items).join(', ') }}
-            </span>
-            <span v-else>Ninguna</span>
-          </p>
-          <button @click="startEditJob(job)" class="edit-btn">Editar</button>
-          <button @click="removeJob(job.id)" class="logout-btn">Eliminar</button>
+    <section v-if="jobs.length" class="company-jobs-section">
+        <h2>Ofertas publicadas</h2>
+        <div class="company-jobs-table-wrapper">
+          <table class="company-jobs-table">
+            <thead>
+              <tr>
+                <th>Puesto</th>
+                <th>Sector</th>
+                <th>Salario</th>
+                <th>Tipo de trabajo</th>
+                <th>Jornada</th>
+                <th>Tecnologías</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="job in jobs" :key="job.id">
+                <td>{{ job.puesto }}</td>
+                <td>{{ job.sector }}</td>
+                <td>{{ job.salary }}</td>
+                <td>{{ job.work_mode }}</td>
+                <td>{{ job.work_time }}</td>
+                <td>
+                  <span v-if="job.tech_stack && job.tech_stack.length">
+                    {{ job.tech_stack.flatMap(sec => sec.items).join(', ') }}
+                  </span>
+                  <span v-else>Ninguna</span>
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <button @click="startEditJob(job)" class="edit-btn">Editar</button>
+                    <button @click="removeJob(job.id)" class="delete-btn">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <form v-else @submit.prevent="saveEditJob" class="job-form">
-          <label>Puesto
-            <textarea v-model="jobEdit.puesto" :class="{ 'input-error': fieldErrors.puesto }" maxlength="20" required /></label>
-            <span v-if="fieldErrors.puesto" class="input-error-message">{{ fieldErrors.puesto }}</span>
-          <label>Sector <input v-model="jobEdit.sector" :class="{ 'input-error': fieldErrors.sector }" required /></label>
-            <span v-if="fieldErrors.sector" class="input-error-message">{{ fieldErrors.sector }}</span>
-          <label>Salario <input v-model="jobEdit.salary" :class="{ 'input-error': fieldErrors.salary }" required /></label>
-            <span v-if="fieldErrors.salary" class="input-error-message">{{ fieldErrors.salary }}</span>
-          <label>
-            Tipo de trabajo
-            <select v-model="jobEdit.work_mode" :class="{ 'input-error': fieldErrors.work_mode }" required>
-              <option value="remoto">Remoto</option>
-              <option value="hibrido">Híbrido</option>
-              <option value="local">Local</option>
-            </select>
-            <span v-if="fieldErrors.work_mode" class="input-error-message">{{ fieldErrors.work_mode }}</span>
-          </label>
-          <label>
-            Tipo de jornada
-            <select v-model="jobEdit.work_time" :class="{ 'input-error': fieldErrors.work_time }" required>
-              <option value="completa">Completa</option>
-              <option value="parcial">Parcial</option>
-              <option value="practicas">Prácticas</option>
-            </select>
-            <span v-if="fieldErrors.work_time" class="input-error-message">{{ fieldErrors.work_time }}</span>
-          </label>
-          <div v-for="section in techOptions" :key="section.category" class="tech-section">
-            <h3>{{ section.category }}</h3>
-            <div class="tech-buttons">
-              <button
-                v-for="item in section.items"
-                :key="item"
-                type="button"
-                :class="{ selected: jobEditSelected.includes(item) }"
-                @click="toggleEditJobTech(item)"
-              >
-                {{ item }}
-              </button>
-            </div>
-          </div>
-          <div class="actions">
-            <button type="submit" class="save-btn">Guardar</button>
-            <button type="button" @click="cancelEditJob" class="cancel-btn">Cancelar</button>
-          </div>
-        </form>
-      </div>
-    </section>
 
+        
+      </section>
+      
     <!-- Aplicaciones a tus ofertas -->
     <section v-if="applications.length" class="applications-section">
       <h2>Desarrolladores que han aplicado a tus ofertas</h2>
-      <div class="applications-grid">
-        <div v-for="app in applications" :key="app.application_id" class="application-card">
-          <p><strong>Oferta:</strong> {{ app.puesto }}</p>
-          <p><strong>Dev:</strong> {{ app.dev_name }} ({{ app.dev_email }})</p>
-          <p><strong>Aplicó el:</strong> {{ new Date(app.applied_at).toLocaleDateString() }}</p>
-        </div>
+      <div class="applications-table-wrapper">
+        <table class="applications-table">
+          <thead>
+            <tr>
+              <th>Oferta</th>
+              <th>Dev</th>
+              <th>Email</th>
+              <th>Aplicó el</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="app in applications" :key="app.application_id">
+              <td>{{ app.puesto }}</td>
+              <td>{{ app.dev_name }}</td>
+              <td>{{ app.dev_email }}</td>
+              <td>{{ new Date(app.applied_at).toLocaleDateString() }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
-
 
     <!-- Modal para cambiar contraseña -->
     <div v-if="showPasswordModal" class="modal-overlay">
       <div class="modal-content">
         <h3>Cambiar contraseña</h3>
         <form @submit.prevent="changePassword">
-          <label>
-            Contraseña actual
-            <input type="password" v-model="passwordForm.current" :class="{ 'input-error': passwordErrors.current }" />
+          <div class="form-group">
+            <label>Contraseña actual</label>
+            <div class="input-icon">
+              <span class="material-icons-outlined">lock</span>
+              <input
+                type="password"
+                v-model="passwordForm.current"
+                :class="{ 'input-error': passwordErrors.current }"
+                placeholder="Contraseña actual"
+              />
+            </div>
             <span v-if="passwordErrors.current" class="input-error-message">{{ passwordErrors.current }}</span>
-          </label>
-          <label>
-            Nueva contraseña
-            <input
-              type="password"
-              v-model="passwordForm.new"
-              :class="{ 'input-error': passwordErrors.new }"
-              @input="validatePasswordForm"
-            />
-            <small class="info">Debe tener al menos 8 caracteres, una mayúscula y un número.</small>
-            <span v-if="passwordErrors.new" class="input-error-message">{{ passwordErrors.new }}</span>
-          </label>
-          <label>
-            Repetir nueva contraseña
-            <input type="password" v-model="passwordForm.repeat" :class="{ 'input-error': passwordErrors.repeat }" />
+          </div>
+          <div class="form-group">
+            <label>Nueva contraseña</label>
+            <div class="input-icon">
+              <span class="material-icons-outlined">lock_reset</span>
+              <input
+                type="password"
+                v-model="passwordForm.new"
+                :class="{ 'input-error': passwordErrors.new }"
+                @input="validatePasswordForm"
+                placeholder="Nueva contraseña"
+              />
+            </div>
+            <span v-if="passwordErrors.new" class="input-error-message">
+              {{ passwordErrors.new || 'Debe tener al menos 8 caracteres, una mayúscula y un número.' }}
+            </span>
+          </div>
+          <div class="form-group">
+            <label>Repetir nueva contraseña</label>
+            <div class="input-icon">
+              <span class="material-icons-outlined">lock</span>
+              <input
+                type="password"
+                v-model="passwordForm.repeat"
+                :class="{ 'input-error': passwordErrors.repeat }"
+                @input="validatePasswordForm"
+                placeholder="Repetir nueva contraseña"
+              />
+            </div>
             <span v-if="passwordErrors.repeat" class="input-error-message">{{ passwordErrors.repeat }}</span>
-          </label>
+          </div>
           <div class="actions">
             <button type="submit" class="save-btn">Guardar</button>
             <button type="button" @click="showPasswordModal = false" class="cancel-btn">Cancelar</button>
@@ -596,108 +708,578 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.avatar-preview {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-}
+<style lang="scss" scoped>
+
 .profile-container {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 20px;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: var(--black);
+  padding: 4rem;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
-.profile-summary,
-.profile-form,
-.job-form {
-  margin-bottom: 1rem;
+
+// Estilos del perfil de empresa
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  .profile-resume {
+    display: flex;
+    flex-direction: row;
+    .profile-avatar {
+      .avatar-preview {
+        width: 180px;
+        height: 180px;
+        max-width: 180px;
+        max-height: 180px;
+        object-fit: cover;
+        border-radius: 20%;
+        margin-bottom: 1.5rem;
+        border: 2px solid var(--green-light);
+        background: var(--smoke);
+        display: block;
+      }
+    }
+    .profile-data {
+      margin-left: 1.5rem;
+      h2 {
+        font-size: 40px;
+        color: var(--white);
+        margin-bottom: 0.5rem;
+      }
+      p {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin: 0.2rem 0;
+        font-size: 1.1rem;
+        color: var(--white);
+        span {
+          margin-right: 0.5rem;
+          color: var(--green-light);
+        }
+      }
+    }
+  }
 }
+
+
+.profile-form .avatar-preview {
+  width: 180px !important;
+  height: 180px !important;
+  max-width: 180px !important;
+  max-height: 180px !important;
+  object-fit: cover;
+  border-radius: 20%;
+  margin-bottom: 1.5rem;
+  border: 2px solid var(--green-light);
+  background: var(--smoke);
+  display: block;
+}
+
+.profile-details {
+  p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--white);
+
+    .material-icons-outlined {
+      color: var(--green-light);
+      font-size: 22px;
+      margin-right: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    span {
+      color: var(--green-light);
+      font-weight: bold;
+      margin-right: 0.3rem;
+    }
+  }
+}
+
+.profile-actions-separator {
+  border: none;
+  border-top: 1px solid var(--green-light);
+  margin: 2rem 0 1.5rem 0;
+  width: 100%;
+  opacity: 0.7;
+}
+
 .actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 1rem;
-}
-.edit-btn, .create-job-btn, .logout-btn, .save-btn, .cancel-btn, .publish-btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.edit-btn { background: #1976d2; color: #fff; }
-.create-job-btn { background: #43a047; color: #fff; }
-.logout-btn { background: #f44336; color: #fff; }
-.save-btn { background: #1976d2; color: #fff; }
-.cancel-btn { background: #aaa; color: #fff; }
-.publish-btn { background: #43a047; color: #fff; }
-.tech-buttons {
-  display: flex;
+  margin-top: 1.5rem;
   flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.tech-buttons button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: none;
-  cursor: pointer;
-}
-.tech-buttons button.selected {
-  background: #007bff;
-  color: #fff;
-  border-color: #0056b3;
-}
-.error { color: #c00; margin: 1rem 0; }
-.profile-form input,
-.profile-form textarea,
-.job-form input,
-.job-form textarea,
-.job-form select {
-  padding: 0.5rem;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-.applications-section {
-  margin-top: 2rem;
-}
-.applications-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-}
-.application-card {
-  padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-}
-.input-error {
-  border: 1.5px solid #c00 !important;
-  background: #fff0f0;
-}
-.input-error-message {
-  color: #c00;
-  font-size: 0.9em;
-  margin-left: 0.5em;
+  justify-content: flex-end;
 }
 
-/* Modal para cambiar contraseña */
+
+// Estilos del Ofertas y Aplicaciones
+.company-jobs-section,
+.applications-section {
+  margin-top: 2rem;
+  background: var(--black, #181818);
+  border-radius: 18px;
+  padding: 1.5rem;
+}
+
+.company-jobs-section h2,
+.applications-section h2 {
+  color: var(--green-light, #00e676);
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.company-jobs-table-wrapper,
+.applications-table-wrapper {
+  overflow-x: auto;
+}
+
+.company-jobs-table,
+.applications-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--black, #181818);
+  color: var(--white, #fff);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.company-jobs-table th,
+.company-jobs-table td,
+.applications-table th,
+.applications-table td {
+  padding: 0.8rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--green-light, #00e676);
+  vertical-align: middle;
+}
+
+.company-jobs-table th,
+.applications-table th {
+  background: var(--green-light, #00e676);
+  color: var(--black, #181818);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.company-jobs-table tr:last-child td,
+.applications-table tr:last-child td {
+  border-bottom: none;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.delete-btn {
+  background: var(--green-light, #00e676);
+  color: var(--black, #181818);
+  border: 1px solid var(--green-light, #00e676);
+  border-radius: 50px;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.delete-btn:hover {
+  background: transparent;
+  color: var(--green-light, #00e676);
+  border-color: var(--green-light, #00e676);
+}
+
+
+// Estilos para los botones
+
+.edit-btn,
+.save-btn,
+.logout-btn,
+.cancel-btn,
+.view-btn,
+.reapply-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: fit-content;
+  background: transparent;
+  color: var(--white);
+  border: 1px solid var(--white);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.publish-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: fit-content;
+  background: transparent;
+  color: var(--green-light);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.edit-btn:hover,
+.save-btn:hover,
+.publish-btn:hover,
+.view-btn:hover,
+.reapply-btn:hover {
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+}
+
+.logout-btn {
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  margin-left: auto;
+  margin-right: 2.5rem; // separa del borde derecho
+}
+.logout-btn:hover {
+  background: transparent;
+  border-color: var(--green-light);
+  color: var(--green-light);
+}
+
+.cancel-btn {
+  background: transparent;
+  color: var(--green-light);
+  border: 1px solid var(--green-light);
+}
+.cancel-btn:hover {
+  background: var(--green-light);
+  color: var(--black);
+}
+
+.delete-btn {
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.delete-btn:hover {
+  background: transparent;
+  color: var(--green-light);
+  border-color: var(--green-light);
+}
+
+.edit-btn,
+.create-job-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--green-light);
+  background: transparent;
+  color: var(--green-light);
+  transition: background 0.2s, color 0.2s;
+}
+
+.edit-btn .material-icons-outlined,
+.create-job-btn .material-icons-outlined {
+  font-size: 22px;
+  color: var(--green-light);
+}
+
+.edit-btn:hover {
+  background: var(--green-light);
+  color: var(--black);
+}
+
+.edit-btn:hover .material-icons-outlined {
+  color: var(--black);
+}
+
+.create-job-btn {
+  background: var(--green-light);
+  color: var(--black);
+  width: auto;
+}
+
+.create-job-btn .material-icons-outlined {
+  color: var(--black);
+}
+
+.create-job-btn:hover {
+  background: var(--black);
+  color: var(--green-light);
+}
+
+.create-job-btn:hover .material-icons-outlined {
+  color: var(--green-light);
+}
+
+
+.logout-btn {
+  position: absolute;
+  top: 24px;
+  right: 0px;
+  z-index: 1100;
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.7rem 2.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.logout-btn:hover {
+  background: transparent;
+  color: var(--green-light);
+  border-color: var(--green-light);
+}
+
+
+input,
+textarea,
+select {
+  min-height: 45px;
+  height: 45px;
+  font-size: 1rem;
+  border-radius: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--white);
+  color: var(--white);
+  padding: 10px;
+  margin-top: 0.3rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border: 1px solid var(--green-light);
+}
+textarea {
+  min-height: 80px;
+  border-radius: 18px;
+  resize: vertical;
+}
+
+button,
+input[type="submit"] {
+  width: 150px;
+  min-height: 45px;
+  height: 45px;
+  font-size: 1rem;
+  border-radius: 50px;
+  box-sizing: border-box;
+  padding: 0.75rem 1.5rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+  color: var(--white);
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+
+// Estilos para edición de perfil
+
+.profile-form label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+  color: var(--white);
+  width: 50%;
+}
+
+.form-row {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.2rem;
+}
+
+.form-row label {
+  flex: 1 1 0;
+  width: 100%;
+}
+
+.profile-form input,
+.profile-form textarea {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  outline: none;
+  transition: border 0.2s;
+  margin-top: 0.3rem;
+}
+
+.profile-form input:focus,
+.profile-form textarea:focus {
+  border: 1px solid var(--green-light);
+}
+
+// Estilos para el modal de cambio de contraseña
+
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 .modal-content {
-  background: #fff;
+  background: var(--black);
+  color: var(--white);
   padding: 2rem;
-  border-radius: 8px;
-  min-width: 300px;
+  border-radius: 20px;
+  min-width: 320px;
+  max-width: 550px;
+  width: 100%;
+  border: 1px solid var(--green-light);
+  box-shadow: 0 2px 12px #0002;
 }
+.modal-content h3 {
+  color: var(--green-light);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 24px;
+}
+.form-group {
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+.input-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon .material-icons-outlined {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--green-light);
+  font-size: 22px;
+  pointer-events: none;
+}
+.modal-content input[type="password"] {
+  padding: 0.75rem 1rem 0.75rem 48px; // espacio para el icono
+  font-size: 1rem;
+  border-radius: 50px;
+  border: 1px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  outline: none;
+  transition: border 0.2s;
+  margin-top: 0.3rem;
+  width: 100%;
+}
+.modal-content input[type="password"]:focus {
+  border: 1px solid var(--green-light);
+}
+.modal-content .save-btn {
+  margin-top: 1rem;
+  width: 100%;
+}
+.modal-content .cancel-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+.modal-content .input-error-message {
+  color: var(--green-light);
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+// Estilos para creacion de ofertas
+
+.form-row {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.2rem;
+}
+
+.form-row label {
+  flex: 1 1 0;
+  width: 100%;
+}
+
+.tech-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.tech-buttons button {
+  height: 45px;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid var(--white);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  &:hover {
+    background: var(--green-light);
+    color: var(--black);
+  }
+}
+.tech-buttons button.selected,
+.tech-buttons button:active {
+  background: var(--green-light);
+  color: var(--black);
+  border-color: var(--green-light);
+}
+
+.tech-section h3,
+.job-form h3 {
+  color: var(--white);
+  font-weight: 400;
+  font-size: 1rem;
+  margin-bottom: 0.7rem;
+  margin-top: 1.2rem;
+}
+
 </style>
