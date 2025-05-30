@@ -191,3 +191,20 @@ export const listDevelopers = async (req, res) => {
     res.status(500).json({ message: 'Error del servidor.' });
   }
 };
+
+export const deleteApplication = async (req, res) => {
+  const devId = req.user.id;
+  const applicationId = req.params.id;
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM applications WHERE id = ? AND dev_id = ?',
+      [applicationId, devId]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'No se encontró la aplicación.' });
+    }
+    res.json({ message: 'Aplicación eliminada correctamente.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al eliminar la aplicación.' });
+  }
+};

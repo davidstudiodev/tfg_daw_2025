@@ -47,6 +47,8 @@
         </div>
       </div>
 
+      <hr class="profile-actions-separator" />
+
       <div class="actions">
         <button type="button" @click="startEditing" class="edit-btn">
           <span class="material-icons-outlined">edit</span>
@@ -127,108 +129,93 @@
     <form v-if="isEditing" @submit.prevent="saveProfile" class="profile-form">
       <h1>Edita tu perfil</h1>
 
-      <label>
-        Avatar
-        <input
-          class="avatar-input"
-          type="file"
-          accept="image/*"
-          @change="handleAvatarChange"
-          :disabled="!isEditing"
-        />
-        <small class="note">Máximo 1 MB, formato JPG/PNG</small>
-      </label>
-      <img
-        v-if="form.avatar"
-        :src="form.avatar"
-        alt="Vista previa"
-        class="avatar-preview"
-      />
+        <div class="form-row">
+          <label>
+            Nombre
+            <input
+              type="text"
+              v-model="form.name"
+              :disabled="!isEditing"
+              :class="{ 'input-error': fieldErrors.name }"
+              required
+            />
+            <span v-if="fieldErrors.name" class="input-error-message">{{ fieldErrors.name }}</span>
+          </label>
+          <label>
+            Correo
+            <input
+              type="email"
+              v-model="form.email"
+              :disabled="!isEditing"
+              :class="{ 'input-error': fieldErrors.email }"
+              required
+            />
+            <span v-if="fieldErrors.email" class="input-error-message">{{ fieldErrors.email }}</span>
+          </label>
+        </div>
 
-      <label>
-        Nombre
-        <input
-          type="text"
-          v-model="form.name"
-          :disabled="!isEditing"
-          :class="{ 'input-error': fieldErrors.name }"
-          required
-        />
-        <span v-if="fieldErrors.name" class="input-error-message">{{ fieldErrors.name }}</span>
-      </label>
+        <div class="form-row">
+          <label>
+            Profesión
+            <input
+              type="text"
+              v-model="form.profession"
+              :disabled="!isEditing"
+              :class="{ 'input-error': fieldErrors.profession }"
+              required
+            />
+            <span v-if="fieldErrors.profession" class="input-error-message">{{ fieldErrors.profession }}</span>
+          </label>
+          <label>
+            Teléfono
+            <input
+              type="tel"
+              v-model="form.phone"
+              :disabled="!isEditing"
+              :class="{ 'input-error': fieldErrors.phone }"
+              required
+            />
+            <span v-if="fieldErrors.phone" class="input-error-message">{{ fieldErrors.phone }}</span>
+          </label>
+        </div>
 
-      <label>
-        Correo
-        <input
-          type="email"
-          v-model="form.email"
-          :disabled="!isEditing"
-          :class="{ 'input-error': fieldErrors.email }"
-          required
-        />
-        <span v-if="fieldErrors.email" class="input-error-message">{{ fieldErrors.email }}</span>
-      </label>
+        <div class="form-row">
+          <label>
+            Años de experiencia
+            <input
+              type="number"
+              v-model.number="form.years_experience"
+              min="0"
+              :disabled="!isEditing"
+              :class="{ 'input-error': fieldErrors.years_experience }"
+              required
+            />
+            <span v-if="fieldErrors.years_experience" class="input-error-message">{{ fieldErrors.years_experience }}</span>
+          </label>
+          <label>
+            Ubicación (ciudad)
+            <input
+              type="text"
+              v-model="form.location"
+              :disabled="!isEditing"
+              :class="{ 'input-error': fieldErrors.location }"
+              required
+            />
+            <span v-if="fieldErrors.location" class="input-error-message">{{ fieldErrors.location }}</span>
+          </label>
+        </div>
 
-      <label>
-        Profesión
-        <input
-          type="text"
-          v-model="form.profession"
-          :disabled="!isEditing"
-          :class="{ 'input-error': fieldErrors.profession }"
-          required
-        />
-        <span v-if="fieldErrors.profession" class="input-error-message">{{ fieldErrors.profession }}</span>
-      </label>
-
-      <label>
-        Teléfono
-        <input
-          type="tel"
-          v-model="form.phone"
-          :disabled="!isEditing"
-          :class="{ 'input-error': fieldErrors.phone }"
-          required
-        />
-        <span v-if="fieldErrors.phone" class="input-error-message">{{ fieldErrors.phone }}</span>
-      </label>
-
-      <label>
-        Biografía
-        <textarea
-          v-model="form.description"
-          rows="3"
-          :disabled="!isEditing"
-          :class="{ 'input-error': fieldErrors.description }"
-          required
-        ></textarea>
-        <span v-if="fieldErrors.description" class="input-error-message">{{ fieldErrors.description }}</span>
-      </label>
-
-      <label>
-        Años de experiencia
-        <input
-          type="number"
-          v-model.number="form.years_experience"
-          min="0"
-          :disabled="!isEditing"
-          :class="{ 'input-error': fieldErrors.years_experience }"
-          required
-        />
-        <span v-if="fieldErrors.years_experience" class="input-error-message">{{ fieldErrors.years_experience }}</span>
-      </label>
-
-      <label>
-        Ubicación (ciudad)
-        <input
-          type="text"
-          v-model="form.location"
-          :disabled="!isEditing"
-          :class="{ 'input-error': fieldErrors.location }"
-          required
-        />
-        <span v-if="fieldErrors.location" class="input-error-message">{{ fieldErrors.location }}</span>
-      </label>
+        <label>
+          Biografía
+          <textarea
+            v-model="form.description"
+            rows="3"
+            :disabled="!isEditing"
+            :class="{ 'input-error': fieldErrors.description }"
+            required
+          ></textarea>
+          <span v-if="fieldErrors.description" class="input-error-message">{{ fieldErrors.description }}</span>
+        </label>
 
       <!-- Selección de tecnologías -->
 
@@ -253,6 +240,8 @@
         </div>
       </div>
 
+      <hr class="profile-actions-separator" />
+
       <!-- Botones de acciones -->
       <div class="actions">
         <button
@@ -273,30 +262,40 @@
     </form>
 
     <!-- Aplicaciones del dev -->
-    <section v-if="applications.length" class="applications-section">
-    <h2>Ofertas a las que has aplicado</h2>
-    <ul class="applications-list">
-      <li
-        v-for="app in applications"
-        :key="app.application_id"
-        class="application-card"
-      >
-        <div class="company-info">
-          <img
-            v-if="app.company_avatar"
-            :src="app.company_avatar"
-            class="company-logo"
-            alt="logo"
-          />
-          <span class="company-name">{{ app.company_name }}</span>
-        </div>
-        <p class="offer-description">{{ app.description }}</p>
-        <p><strong>Jornada:</strong> {{ app.work_time }}</p>
-        <p><strong>Salario:</strong> {{ app.salary }}</p>
-        <p><strong>Aplicaste el:</strong> {{ new Date(app.applied_at).toLocaleDateString() }}</p>
-      </li>
-    </ul>
-  </section>
+    <section v-if="applications.length && !isEditing" class="applications-section">
+      <h2>Ofertas a las que has aplicado</h2>
+      <div class="applications-table-wrapper">
+        <table class="applications-table">
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Puesto</th>
+              <th>Jornada</th>
+              <th>Salario</th>
+              <th>Aplicaste el</th>
+              <th>Acciones</th> <!-- NUEVO -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="app in applications" :key="app.application_id">
+              <td>{{ app.company_name }}</td>
+              <td>{{ app.puesto }}</td>
+              <td>{{ app.work_time }}</td>
+              <td>{{ app.salary }}</td>
+              <td>{{ new Date(app.applied_at).toLocaleDateString() }}</td>
+              <td>
+                <button
+                  class="delete-btn"
+                  @click="deleteApplication(app.application_id)"
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
 
   </div>
@@ -569,6 +568,17 @@ function closePasswordModal() {
   passwordChangeError.value = ''
 }
 
+async function deleteApplication(applicationId) {
+  if (!confirm('¿Seguro que deseas eliminar esta aplicación?')) return;
+  try {
+    await api.delete(`/api/dev/applications/${applicationId}`);
+    // Elimina la aplicación del array local sin recargar toda la lista
+    applications.value = applications.value.filter(app => app.application_id !== applicationId);
+  } catch (e) {
+    alert('No se pudo eliminar la aplicación.');
+  }
+}
+
 onMounted(() => {
   loadProfile();
   loadApplications();
@@ -578,16 +588,20 @@ onMounted(() => {
 <style lang="scss" scoped>
 .profile-container {
   padding: 20px;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .profile-content {
   margin-top: 80px;
-  margin-left: 40px;
   display: flex;
   flex-direction: column;
   width: 100%;
   background: var(--black);
-  padding: 2rem;
+  padding: 4rem;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
   h1 {
     font-size: 50px;
     font-weight: 500;
@@ -667,6 +681,21 @@ onMounted(() => {
   margin-bottom: 1.2rem;
   color: var(--white);
   width: 50%;
+}
+
+.form-row {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.2rem;
+}
+
+.form-row label {
+  flex: 1 1 0;
+  width: 100%;
+}
+
+.profile-form label {
+  width: 100%; // Asegura que los labels ocupen el ancho disponible
 }
 
 .profile-form input,
@@ -765,14 +794,16 @@ onMounted(() => {
 }
 
 .logout-btn {
-  background: #f44336;
-  color: #fff;
-  border: 1px solid #f44336;
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
   margin-left: auto;
+  
 }
 .logout-btn:hover {
-  background: #c62828;
-  border-color: #c62828;
+  background: transparent;
+  border-color: var(--green-light);
+  color: var(--green-light);
 }
 
 .cancel-btn {
@@ -929,6 +960,7 @@ textarea {
 
 button,
 input[type="submit"] {
+  width: 150px;
   min-height: 45px;
   height: 45px;
   font-size: 1rem;
@@ -968,7 +1000,7 @@ input[type="submit"] {
 
 .modal-content h3 {
   color: var(--green-light);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   text-align: center;
   font-size: 24px;
 }
@@ -1006,6 +1038,64 @@ input[type="submit"] {
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
 }
+
+.profile-actions-separator {
+  border: none;
+  border-top: 1px solid var(--green-light);
+  margin: 2rem 0 1.5rem 0;
+  width: 100%;
+  opacity: 0.7;
+}
+
+.applications-table-wrapper {
+  overflow-x: auto;
+}
+
+.applications-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--black);
+  color: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.applications-table th,
+.applications-table td {
+  padding: 0.8rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--green-light);
+  vertical-align: middle;
+}
+
+.applications-table th {
+  background: var(--green-light);
+  color: var(--black);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.applications-table tr:last-child td {
+  border-bottom: none;
+}
+
+.delete-btn {
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.delete-btn:hover {
+  background: transparent;
+  color: var(--green-light);
+  border-color: var(--green-light);
+  cursor: pointer;
+}
+
 
 
 </style>
