@@ -33,7 +33,7 @@
 
         <div class="company_text">
           <h2>Encuentra devs <br>que encajan en tu stack</h2>
-          <p>Desarrolladores con las skills que tu equipo necesita. <br>Sin rodeos.</p>
+          <p>Desarrolladores con las skills que tu equipo necesita. <br class="hide-on-mobile">Sin rodeos.</p>
         </div>
 
       </div>
@@ -128,6 +128,13 @@ onMounted(() => {
   font-weight: bold;
   font-size: 1.5rem;
 }
+
+.auth-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+}
+
 .auth-buttons button {
     margin-left: 0.5rem;
     color: var(--green-light);
@@ -287,5 +294,96 @@ onMounted(() => {
   transform: translateX(0);
 }
 
+
+//Responsive styles
+
+@media (max-width: 900px) {
+  .devs_mockups {
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    margin-top: 0;
+  }
+  .devs_mockups img:first-child {
+    display: none; // Oculta Macbook
+  }
+  .devs_mockups img:last-child {
+    max-width: 80vw;
+    margin-left: 0;
+    display: block;
+    margin-top: 0; 
+  }
+  .form-section h2 {
+    font-size: 40px;
+    line-height: 40px;
+  }
+  
+  .form-section p {
+    text-align: center;
+    font-size: 16px;
+    
+  }
+}
+
+@media (max-width: 600px) {
+  .auth-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.7rem;
+  }
+  .devs_mockups img:last-child {
+    max-width: 95vw;
+    margin-top: -70px; 
+  }
+}
+
+@media (max-width: 900px) {
+  .hide-on-mobile {
+    display: none;
+  }
+  .company-section {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .company_mockups {
+      order: 2;
+      margin-top: 1.5rem;
+      img {
+        max-width: 80vw;
+        margin: 0 auto;
+        display: block;
+      }
+    }
+    .company_text {
+      order: 1;
+      margin-top: 0;
+      text-align: center;
+      max-width: 100%;
+      h2 {
+        font-size: 40px;
+        line-height: 40px;
+      }
+      p {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .company-section .company_mockups img {
+    max-width: 95vw;
+    margin-top: -70px;
+  }
+  .company-section .company_text h2 {
+    font-size: 40px;
+    line-height: 40px;
+  }
+  .company-section .company_text p {
+    font-size: 16px;
+  }
+}
 
 </style>

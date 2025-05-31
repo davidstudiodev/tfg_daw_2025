@@ -398,4 +398,105 @@ h1 {
   border-color: #aaa !important;
 }
 
+
+// Responsive styles
+
+@media (max-width: 900px) {
+  .offers-container {
+    margin: 50px;
+    padding: 1rem 0.2rem;
+    border-radius: 10px;
+  }
+
+  .offers-header {
+    position: static;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: end;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .offers-header .auth-btn {
+    min-width: 120px;
+    width: auto;
+  }
+
+  .filters {
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-bottom: 1.5rem;
+  }
+  .offers-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .offer-card {
+    min-height: 340px;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  .offer-title {
+    font-size: 1.2rem;
+    width: 100%;
+  }
+  .company-logo {
+    width: 32px;
+    height: 32px;
+  }
+  .card-actions {
+    margin-top: 1rem;
+  }
+  .pagination {
+    margin-top: 1.2rem;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .offers-container {
+    padding: 0.5rem 0;
+    border-radius: 0;
+  }
+  .offers-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .filters {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+    margin-bottom: 1rem;
+  }
+  .offers-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .offer-card {
+    min-height: 0;
+    padding: 0.8rem;
+    border-radius: 10px;
+  }
+  .offer-title {
+    font-size: 1rem;
+    width: 100%;
+  }
+  .company-logo {
+    width: 28px;
+    height: 28px;
+  }
+  .card-actions {
+    margin-top: 0.7rem;
+  }
+  .pagination {
+    margin-top: 1rem;
+    gap: 0.3rem;
+    font-size: 0.95rem;
+  }
+}
+
 </style>

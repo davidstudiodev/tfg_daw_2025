@@ -229,7 +229,7 @@ onMounted(async () => {
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 
 .developers-list {
   position: relative;
@@ -437,7 +437,7 @@ h1 {
 .close-btn {
   position: absolute;
   top: 10px;
-  right: 0px;
+  right: -30px;
   background: transparent;
   border: none;
   color: var(--green-light);
@@ -495,6 +495,138 @@ h1 {
 
 .pagination .material-icons-outlined {
   font-size: 16px;
+}
+
+
+// Responsive styles
+
+@media (max-width: 900px) {
+  .developers-list {
+    margin: 50px;
+    padding: 1.5rem 0.5rem;
+    border-radius: 12px;
+  }
+  .developers-header {
+    position: static;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+    top: unset;
+    right: unset;
+  }
+  .auth-btn {
+    min-width: 120px;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.7rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .filters {
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+  }
+  .dev-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .dev-card {
+    min-height: 320px;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  .dev-header {
+    gap: 0.7rem;
+  }
+  .dev-name {
+    font-size: 1.2rem;
+  }
+  .avatar {
+    width: 48px;
+    height: 48px;
+  }
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+    margin-right: 0.2rem;
+    margin-bottom: 0.2rem;
+  }
+  .pagination {
+    margin-top: 1.2rem;
+    gap: 0.5rem;
+  }
+  .modal-content {
+    min-width: 220px;
+    max-width: 80vw;
+    height: auto;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .developers-list {
+    padding: 0.5rem 0;
+    border-radius: 0;
+  }
+  .developers-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  .filters {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+    margin-bottom: 1rem;
+  }
+  .dev-cards {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .dev-card {
+    min-height: 0;
+    padding: 0.8rem;
+    border-radius: 10px;
+  }
+  .dev-header {
+    gap: 0.5rem;
+  }
+  .dev-name {
+    font-size: 1.1rem;
+  }
+  .avatar {
+    width: 38px;
+    height: 38px;
+  }
+  .card-actions {
+    margin-top: 0.7rem;
+  }
+  .pagination {
+    margin-top: 1rem;
+    gap: 0.3rem;
+    font-size: 0.95rem;
+  }
+  .modal-content {
+    min-width: 120px;
+    max-width: 80vw;
+    height: auto;
+    padding: 0.7rem;
+  }
 }
 
 </style>

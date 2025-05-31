@@ -52,6 +52,10 @@
           <span class="material-icons-outlined">lock_reset</span>
           Cambiar contraseña
         </button>
+        <button class="edit-btn" @click="openEmailModal">
+          <span class="material-icons-outlined">alternate_email</span>
+          Cambiar correo
+        </button>
       </div>
       <table>
         <thead>
@@ -431,7 +435,7 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 
 .admin-profile {
   max-width: 1100px;
@@ -646,5 +650,145 @@ input[type="submit"]:hover {
   width: 100%;
 }
 
+
+// Responsive styles
+
+@media (max-width: 900px) {
+  .admin-profile {
+    padding: 1.5rem 0.5rem;
+    border-radius: 12px;
+    min-width: 0;
+    margin: 20px;
+  }
+  .logout-btn {
+    top: 18px;
+    right: 18px;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    border-radius: 50px;
+  }
+  h1 {
+    font-size: 1.1rem;
+    text-align: left;
+    margin-top: 80px;
+  }
+  h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.7rem;
+    text-align: left;
+  }
+  .tabs {
+    gap: 0.3rem;
+    display: flex;
+    margin-bottom: 0.7rem;
+    flex-direction: row;
+  }
+  .filters {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+    margin-bottom: 1rem;
+    padding: 20px;
+  }
+  .filters input {
+    min-width: 0;
+    width: 100%;
+    font-size: 1rem;
+  }
+  table {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    width: auto;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+  }
+  th, td {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.97rem;
+    width: 100%;
+  }
+
+  .table-actions {
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: stretch;
+    justify-content: center;
+  }
+  .modal {
+    min-width: 0;
+    max-width: 80vw;
+    padding: 1rem;
+  }
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  .modal input,
+  .modal textarea {
+    font-size: 0.98rem;
+    padding: 0.6rem 0.8rem;
+  }
+  .input-icon input {
+    padding-left: 44px;
+    width: 100%;
+  }
+  
+}
+
+
+@media (max-width: 600px) {
+  .admin-profile {
+    padding: 0.5rem 0.1rem;
+    border-radius: 0;
+  }
+  .logout-btn {
+    top: 8px;
+    right: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+  }
+  h1 {
+    font-size: 1.1rem;
+    margin-bottom: 0.7rem;
+  }
+  h2 {
+    margin-top: 2rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  .tabs {
+    gap: 0.3rem;
+    margin-bottom: 0.7rem;
+  }
+  .filters {
+    gap: 0.8rem;
+    margin-bottom: 0.7rem;
+  }
+  table {
+    font-size: 0.9rem;
+    border-radius: 7px;
+  }
+  th, td {
+    padding: 0.4rem 0.2rem;
+    font-size: 0.93rem;
+  }
+  .modal {
+    padding: 0.7rem;
+    max-width: 80vw;
+  }
+  .modal input,
+  .modal textarea {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.7rem;
+  }
+  .input-icon input {
+    padding-left: 44px;
+    width: 100%;
+  }
+}
 
 </style>

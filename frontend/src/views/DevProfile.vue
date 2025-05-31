@@ -36,7 +36,7 @@
         </div>
         <div class="profile-details">
           <p><span class="material-icons-outlined">person</span><strong>Biografía:</strong> {{ form.description }}</p>
-          <p><span class="material-icons-outlined">work_history</span><strong>Años experiencia:</strong> {{ form.years_experience }} año/s</p>
+          <p><span class="material-icons-outlined">work_history</span><strong>Años experiencia:</strong> {{ form.years_experience }} año/s de experiencia</p>
           <p><span class="material-icons-outlined">location_on</span><strong>Ubicación:</strong> {{ form.location }}</p>
           <p>
             <span class="material-icons-outlined">military_tech</span>
@@ -1100,5 +1100,151 @@ input[type="submit"] {
 }
 
 
+// Responsive styles
+
+@media (max-width: 900px) {
+  .logout-btn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    margin-left: 0;
+    z-index: 1100;
+  }
+}
+
+@media (max-width: 900px) {
+  .avatar-preview {
+    width: 90px;
+    min-width: 90px;
+    max-width: 90px;
+    margin-bottom: 1rem;
+  }
+  .profile-data h2 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .profile-content {
+    padding: 2rem;
+  }
+  .profile-resume {
+    flex-direction: column;
+    align-items: center;
+  }
+  .profile-details {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    width: 100%;
+  }
+  .profile-details p {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: start;
+    align-content: flex-end;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 2rem;
+    width: 100%;
+  }
+  .profile-details p .material-icons-outlined {
+    margin-right: 0.2rem;
+  }
+  .profile-details p strong {
+    text-align: left;
+    
+  }
+  
+}
+
+@media (max-width: 900px) {
+  .actions {
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: stretch;
+  }
+  .actions > button,
+  .actions > .edit-btn,
+  .actions > .save-btn,
+  .actions > .publish-btn,
+  .actions > .cancel-btn {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 900px) {
+  .applications-table-wrapper {
+    overflow-x: visible;
+  }
+  .applications-table {
+    display: block;
+    width: 100%;
+    border-radius: 0;
+    background: none;
+  }
+  .applications-table thead {
+    display: none;
+  }
+  .applications-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .applications-table tr {
+    display: flex;
+    flex-direction: column;
+    background: var(--black);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px #0002;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--green-light);
+  }
+  .applications-table td {
+    border: none;
+    text-align: left;
+    padding: 0.3rem 0;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .applications-table td:last-child {
+    justify-content: flex-end;
+  }
+  .delete-btn {
+    width: 30%;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .delete-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+
+  .form-row {
+    flex-direction: column;
+    gap: 0rem;
+  }
+
+/* Modal padding en mobile */
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 20px !important;
+    min-width: unset;
+    max-width: 80vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
 
 </style>

@@ -283,4 +283,33 @@ async function submit() {
   border: 1.5px solid var(--green-light);
 }
 
+
+// Responsive styles
+
+@media (max-width: 900px) {
+  .auth-container h2 {
+    text-align: center;
+    font-size: 2.2rem;
+  }
+  .forgot-password-modal form {
+    min-width: unset;
+    max-width: 80vw;
+    width: 80vw;
+    padding: 1.2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .auth-container h2 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  .forgot-password-modal form {
+    max-width: 90vw;
+    width: 90vw;
+    padding: 1rem;
+  }
+}
+
+
 </style>

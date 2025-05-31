@@ -5,7 +5,6 @@
       <span class="material-icons-outlined">logout</span>
       Cerrar sesión
     </button>
-    <h1>Perfil de Empresa</h1>
 
     <!-- Notificaciones -->
     <p v-if="error" class="error">{{ error }}</p>
@@ -218,7 +217,7 @@
     </form>
 
     <!-- Resumen de ofertas -->
-    <section v-if="jobs.length" class="company-jobs-section">
+    <section v-if="jobs.length" class="company-jobs-section desktop-only">
         <h2>Ofertas publicadas</h2>
         <div class="company-jobs-table-wrapper">
           <table class="company-jobs-table">
@@ -261,7 +260,7 @@
       </section>
       
     <!-- Aplicaciones a tus ofertas -->
-    <section v-if="applications.length" class="applications-section">
+    <section v-if="applications.length" class="applications-section desktop-only">
       <h2>Desarrolladores que han aplicado a tus ofertas</h2>
       <div class="applications-table-wrapper">
         <table class="applications-table">
@@ -343,12 +342,69 @@
       </div>
     </div>
 
+    <!-- Cards de ofertas publicadas (solo responsive) -->
+    <div class="offers-grid mobile-only">
+      <h2 class="section-title">Ofertas publicadas</h2>
+      <div v-for="job in jobs" :key="job.id" class="offer-card">
+        <div class="company-info">
+          <img v-if="form.avatar" :src="form.avatar" class="company-logo" alt="logo" />
+          <span class="company-name">{{ form.name }}</span>
+        </div>
+        <h1 class="offer-title">{{ job.puesto }}</h1>
+        <div class="offer-details">
+          <div class="detail-row">
+            <span class="material-icons-outlined">business</span>
+            <span>{{ job.sector }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">attach_money</span>
+            <span>{{ job.salary }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">schedule</span>
+            <span>{{ job.work_time }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">location_on</span>
+            <span>{{ form.location }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">code</span>
+            <span>
+              {{ job.tech_stack && job.tech_stack.length ? job.tech_stack.flatMap(sec => sec.items).join(', ') : 'Ninguna' }}
+            </span>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button @click="startEditJob(job)" class="edit-btn">Editar</button>
+          <button @click="removeJob(job.id)" class="delete-btn">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards de aplicaciones (solo responsive) -->
+    <div class="offers-grid mobile-only">
+      <h2 class="section-title">Desarrolladores que han aplicado a tus ofertas</h2>
+      <div v-for="app in applications" :key="app.application_id" class="offer-card">
+        <div class="company-info">
+          <span class="company-name">{{ app.dev_name }}</span>
+        </div>
+        <h1 class="offer-title">{{ app.puesto }}</h1>
+        <div class="offer-details">
+          <div class="detail-row">
+            <span class="material-icons-outlined">email</span>
+            <span>{{ app.dev_email }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">event</span>
+            <span>{{ new Date(app.applied_at).toLocaleDateString() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
   </div>
-
-  
-
-
 
 </template>
 
@@ -960,7 +1016,7 @@ onMounted(() => {
   color: var(--black);
   border: 1px solid var(--green-light);
   margin-left: auto;
-  margin-right: 2.5rem; // separa del borde derecho
+  margin-right: 1rem;
 }
 .logout-btn:hover {
   background: transparent;
@@ -1283,5 +1339,192 @@ label {
   margin-bottom: 0.7rem;
   margin-top: 1.2rem;
 }
+
+
+// Responsive styles
+
+.desktop-only { display: block; }
+.mobile-only { display: none; }
+
+@media (max-width: 900px) {
+
+  .profile-container {
+    padding: 50px;
+  }
+
+  .logout-btn {
+    position: absolute;
+    top: 24px;
+    right: 10px;
+    margin-left: 0;
+    z-index: 1100;
+    padding: 0.7rem 1.2rem;
+    font-size: 1rem;
+  }
+  .profile-resume {
+    margin-top: 30px;
+    flex-direction: column;
+    align-items: flex-start;
+    .profile-avatar .avatar-preview {
+      width: 90px !important;
+      height: 90px !important;
+      margin-bottom: 1rem;
+    }
+
+    .profile-data {
+      margin-left: 0;
+      margin-top: -2.5rem;
+      align-items: center;
+      h2, p {
+        text-align: flex-start;
+      }
+    }
+  }
+  .profile-details {
+    align-items: flex-end;
+    p {
+      gap: 0.4rem;
+      font-size: 1.1rem;
+      justify-content: flex-start;
+      text-align: left;
+      display: flex;
+      width: 100%;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+    button {
+      width: 100% !important;
+      min-width: 0 !important;
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .logout-btn {
+    top: 16px;
+    right: 0px;
+    font-size: 0.95rem;
+  }
+  .profile-resume .profile-avatar .avatar-preview {
+    width: 90px !important;
+    height: 90px !important;
+  }
+  .profile-details {
+    align-items: flex-end;
+    p {
+      gap: 0.4rem;
+      font-size: 1.1rem;
+      justify-content: flex-start;
+      text-align: left;
+      display: flex;
+      width: 100%;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+  .actions {
+    gap: 0.5rem;
+    button {
+      font-size: 0.95rem;
+      padding: 0.5rem 1rem;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: grid !important; }
+  .offers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .offer-card {
+    background: var(--black, #181818);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px #0002;
+    padding: 1rem;
+    border: 1px solid var(--green-light);
+    color: var(--white);
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .company-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    margin-right: 0.5rem;
+  }
+  .company-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.7rem;
+  }
+  .offer-title {
+    font-size: 1.1rem;
+    margin: 0.5rem 0 1rem 0;
+    color: var(--green-light);
+  }
+  .offer-details {
+    margin-bottom: 1rem;
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+      color: var(--white);
+      .material-icons-outlined {
+        font-size: 20px;
+        color: var(--green-light);
+      }
+    }
+  }
+  .card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .offers-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .offer-card {
+    min-height: 0;
+    padding: 0.8rem;
+    border-radius: 10px;
+  }
+  .company-logo {
+    width: 28px;
+    height: 28px;
+  }
+  .offer-title {
+    font-size: 1rem;
+  }
+}
+
+.section-title {
+  grid-column: 1 / -1;
+  color: var(--green-light, #00e676);
+  font-size: 1.2rem;
+  margin-top: 20px;
+  text-align: left;
+}
+
 
 </style>
