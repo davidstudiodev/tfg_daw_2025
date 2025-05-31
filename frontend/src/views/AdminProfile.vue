@@ -16,6 +16,10 @@
           <span class="material-icons-outlined">lock_reset</span>
           Cambiar contraseña
         </button>
+        <button class="edit-btn" @click="openEmailModal">
+          <span class="material-icons-outlined">alternate_email</span>
+          Cambiar correo
+        </button>
       </div>
       <table>
         <thead>
@@ -171,7 +175,26 @@
       </div>
     </div>
 
-
+    <!-- Modal para cambiar correo -->
+    <div v-if="showEmailModal" class="modal-overlay">
+      <div class="modal">
+        <h3>Cambiar correo</h3>
+        <form @submit.prevent="changeEmail">
+          <label>Correo actual</label>
+          <input type="email" :value="adminEmail" disabled />
+          <label>Nuevo correo</label>
+          <input v-model="emailForm.email" type="email" required />
+          <label>Contraseña actual</label>
+          <input v-model="emailForm.currentPassword" type="password" required placeholder="Contraseña actual" />
+          <div class="modal-actions">
+            <button type="submit" class="save-btn">Guardar</button>
+            <button type="button" @click="closeEmailModal" class="cancel-btn">Cancelar</button>
+          </div>
+          <p v-if="emailSuccess" class="success">{{ emailSuccess }}</p>
+          <p v-if="emailError" class="error">{{ emailError }}</p>
+        </form>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -352,7 +375,57 @@ function closePasswordModal() {
 }
 
 
-onMounted(fetchUsers)
+// Modal para cambiar email
+const showEmailModal = ref(false)
+const emailForm = ref({ email: '', currentPassword: '' })
+const emailError = ref('')
+const emailSuccess = ref('')
+const adminEmail = ref('')
+
+function openEmailModal() {
+  emailForm.value.email = adminEmail.value
+  emailForm.value.currentPassword = ''
+  emailError.value = ''
+  emailSuccess.value = ''
+  showEmailModal.value = true
+}
+
+function closeEmailModal() {
+  showEmailModal.value = false
+  emailForm.value = { email: adminEmail.value, currentPassword: '' }
+  emailError.value = ''
+  emailSuccess.value = ''
+}
+
+async function changeEmail() {
+  emailError.value = ''
+  emailSuccess.value = ''
+  try {
+    await api.put('/api/auth/change-email', {
+      email: emailForm.value.email,
+      currentPassword: emailForm.value.currentPassword
+    })
+    emailSuccess.value = 'Correo actualizado correctamente.'
+    adminEmail.value = emailForm.value.email
+    setTimeout(() => {
+      closeEmailModal()
+      location.reload()
+    }, 1200)
+  } catch (e) {
+    emailError.value = e.response?.data?.message || 'Error al actualizar el correo.'
+  }
+}
+
+
+onMounted(async () => {
+  fetchUsers()
+  try {
+    const { data } = await api.get('/api/auth/me')
+    adminEmail.value = data.email
+  } catch (e) {
+    adminEmail.value = ''
+  }
+})
 </script>
 
 <style scoped>
