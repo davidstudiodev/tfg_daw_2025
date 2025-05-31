@@ -69,6 +69,9 @@ import { register as registerUser } from '../services/auth.js'  // << importa tu
 
 import AppLogo from '../components/AppLogo.vue'
 
+import { useToast } from "vue-toastification";
+const toast = useToast();
+
 const route = useRoute()
 const router = useRouter()
 
@@ -113,7 +116,7 @@ const submitForm = async () => {
       role: role.value
     })
 
-    alert('¡Te has registrado! Ahora puedes iniciar sesión.')
+    toast.info('¡Te has registrado! Ahora puedes iniciar sesión.')
 
     // 6) Redirigir tras registro correcto
     router.push({ name: 'login', query: { role: role.value } })

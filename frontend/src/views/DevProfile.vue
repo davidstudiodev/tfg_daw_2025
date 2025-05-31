@@ -313,6 +313,9 @@ import { techOptions } from '../constants/techOptions.js';
 import api from '../services/api.js';
 import AppLogo from '../components/AppLogo.vue'
 
+import { useToast } from "vue-toastification";
+const toast = useToast();
+
 const router = useRouter();
 const loading = ref(true);
 const saving = ref(false);
@@ -490,7 +493,7 @@ async function saveProfile() {
 
   try {
     await updateDevProfile(form.value)
-    alert('Perfil actualizado correctamente.')
+    toast.success('Perfil actualizado correctamente.')
     isEditing.value = false
     await loadProfile()
   } catch (e) {
@@ -553,7 +556,7 @@ async function changePassword() {
       newPassword: passwordForm.value.new
     })
     passwordChangeSuccess.value = 'Contraseña cambiada correctamente.'
-    alert('¡Contraseña cambiada correctamente!')
+    toast.success('¡Contraseña cambiada correctamente!')
     closePasswordModal() // Usa la función centralizada
   } catch (e) {
     passwordChangeError.value = e.response?.data?.message || 'Error al cambiar la contraseña.'
@@ -575,7 +578,7 @@ async function deleteApplication(applicationId) {
     // Elimina la aplicación del array local sin recargar toda la lista
     applications.value = applications.value.filter(app => app.application_id !== applicationId);
   } catch (e) {
-    alert('No se pudo eliminar la aplicación.');
+    toast.error('No se pudo eliminar la aplicación.');
   }
 }
 

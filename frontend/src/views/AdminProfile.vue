@@ -204,6 +204,9 @@ import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
 import { useRouter } from 'vue-router'
 
+import { useToast } from "vue-toastification";
+const toast = useToast();
+
 const tab = ref('devs')
 const devs = ref([])
 const companies = ref([])
@@ -245,7 +248,7 @@ async function editUser(user) {
       editCompanyData.value = { ...data }
       showEditCompanyModal.value = true
     } catch (e) {
-      alert('Error al cargar los datos de la empresa')
+      toast.error('Error al cargar los datos de la empresa')
     }
   } else {
     // Developer
@@ -254,7 +257,7 @@ async function editUser(user) {
       editUserData.value = { ...data }
       showEditModal.value = true
     } catch (e) {
-      alert('Error al cargar los datos del usuario')
+      toast.error('Error al cargar los datos del usuario')
     }
   }
 }
@@ -269,9 +272,9 @@ async function saveEdit() {
     await api.put(`/api/admin/users/${editUserData.value.id}`, editUserData.value)
     showEditModal.value = false
     fetchUsers()
-    alert('Usuario editado correctamente')
+    toast.success('Usuario editado correctamente')
   } catch (e) {
-    alert('Error al guardar los cambios')
+    toast.error('Error al guardar los cambios')
   }
 }
 
@@ -286,9 +289,9 @@ async function saveEditCompany() {
     await api.put(`/api/admin/companies/${editCompanyData.value.id}`, editCompanyData.value)
     showEditCompanyModal.value = false
     fetchUsers()
-    alert('Empresa editada correctamente')
+    toast.success('Empresa editada correctamente')
   } catch (e) {
-    alert('Error al guardar los cambios')
+    toast.error('Error al guardar los cambios')
   }
 }
 
@@ -300,9 +303,9 @@ async function deleteUser(user) {
       try {
         await api.delete(`/api/admin/companies/${user.id}`)
         fetchUsers()
-        alert('Empresa eliminada correctamente')
+        toast.success('Empresa eliminada correctamente')
       } catch (e) {
-        alert('Error al eliminar la empresa')
+        toast.error('Error al eliminar la empresa')
       }
     }
   } else {
@@ -310,9 +313,9 @@ async function deleteUser(user) {
       try {
         await api.delete(`/api/admin/users/${user.id}`)
         fetchUsers()
-        alert('Usuario eliminado correctamente')
+        toast.success('Usuario eliminado correctamente')
       } catch (e) {
-        alert('Error al eliminar el usuario')
+        toast.error('Error al eliminar el usuario')
       }
     }
   }
@@ -324,7 +327,7 @@ async function logout() {
     await api.post('/api/auth/logout')
     router.push({ name: 'admin-login' })
   } catch (e) {
-    alert('Error al cerrar sesión')
+    toast.error('Error al cerrar sesión')
   }
 }
 
@@ -359,7 +362,7 @@ async function changePassword() {
       newPassword: passwordForm.value.new
     })
     passwordChangeSuccess.value = 'Contraseña cambiada correctamente.'
-    alert('¡Contraseña cambiada correctamente!')
+    toast.success('¡Contraseña cambiada correctamente!')
     closePasswordModal()
   } catch (e) {
     passwordChangeError.value = e.response?.data?.message || 'Error al cambiar la contraseña.'

@@ -362,6 +362,9 @@ import { getCompanyJobs, updateJob, deleteJob } from '../services/profile.js'
 import api from '../services/api.js';
 import AppLogo from '../components/AppLogo.vue'
 
+import { useToast } from "vue-toastification";
+const toast = useToast();
+
 const router = useRouter()
 const loading = ref(true)
 const saving = ref(false)
@@ -460,7 +463,7 @@ async function saveProfile() {
 
   try {
     await updateCompanyProfile(form.value)
-    alert('Perfil actualizado correctamente.')
+    toast.success('Perfil actualizado correctamente.')
     isEditingProfile.value = false
     await loadProfile()
   } catch (e) {
@@ -539,8 +542,7 @@ async function publishJob() {
   fieldErrors.value = {};
   try {
     await createJob({ ...job.value });
-    alert('Oferta publicada correctamente.');
-    success.value = 'Oferta publicada correctamente.';
+    toast.success('Oferta publicada correctamente.');
     isCreatingJob.value = false;
     await loadJobs();
   } catch (e) {
@@ -638,7 +640,7 @@ async function saveEditJob() {
     return;
   }
   await updateJob(editingJobId.value, jobEdit.value)
-  alert('Oferta editada correctamente.')
+  toast.success('Oferta editada correctamente.')
   editingJobId.value = null
   jobEdit.value = {}
   jobEditSelected.value = []
@@ -691,7 +693,7 @@ async function changePassword() {
       newPassword: passwordForm.value.new
     })
     passwordChangeSuccess.value = 'Contraseña cambiada correctamente.'
-    alert('¡Contraseña cambiada correctamente!') 
+    toast.success('¡Contraseña cambiada correctamente!')
     showPasswordModal.value = false
     passwordForm.value = { current: '', new: '', repeat: '' }
   } catch (e) {

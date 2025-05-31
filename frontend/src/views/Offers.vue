@@ -90,7 +90,9 @@ import { useRouter } from 'vue-router';
 import AppLogo from '../components/AppLogo.vue';
 import api from '../services/api.js';
 import { getMe } from '../services/auth.js';
-import { getDevProfile } from '../services/profile.js';
+
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const offers = ref([]);
 const page = ref(1);
@@ -154,10 +156,10 @@ const goToCompanyProfile = () => {
 async function applyToOffer(offer) {
   try {
     await api.post(`/api/offers/${offer.id}/apply`);
-    alert('Has aplicado correctamente y te contactaremos pronto.');
+    toast.info('Has aplicado correctamente y te contactaremos pronto.');
     await fetchAppliedOffers(); // Actualiza la lista tras aplicar
   } catch (e) {
-    alert(e.response?.data?.message || 'Error al aplicar a la oferta.');
+    toast.error(e.response?.data?.message || 'Error al aplicar a la oferta.');
   }
 }
 
