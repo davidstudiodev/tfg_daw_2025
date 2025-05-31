@@ -82,6 +82,8 @@ const goTo = (type) => {
 const goToProfile = () => {
   if (userRole.value === 'company') {
     router.push({ name: 'company-profile' });
+  } else if (userRole.value === 'admin') {
+    router.push({ name: 'admin-profile' });
   } else {
     router.push({ name: 'dev-profile' });
   }

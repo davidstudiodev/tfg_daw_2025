@@ -29,31 +29,57 @@
     </div>
     <div class="offers-grid">
       <div v-for="offer in offers" :key="offer.id" class="offer-card">
+        
         <div class="company-info">
           <img v-if="offer.company_avatar" :src="offer.company_avatar" class="company-logo" alt="logo" />
           <span class="company-name">{{ offer.company_name }}</span>
         </div>
-        <!-- Mostrar puesto en vez de description en la lista de ofertas -->
-        <p class="offer-description">{{ offer.puesto }}</p>
-        <p><strong>Ubicación:</strong> {{ offer.company_location }}</p>
-        <p><strong>Jornada:</strong> {{ offer.work_time }}</p>
-        <p><strong>Salario:</strong> {{ offer.salary }}</p>
-        <p><strong>Tecnologías:</strong> {{ offer.tech_stack && offer.tech_stack.length ? offer.tech_stack.flatMap(sec => sec.items).join(', ') : 'Ninguna' }}</p>
-        <button
-          v-if="canApply"
-          @click="applyToOffer(offer)"
-          class="apply-btn"
-          :disabled="appliedOffers.includes(offer.id)"
-        >
-          {{ appliedOffers.includes(offer.id) ? 'Ya aplicaste' : 'Aplicar' }}
-        </button>
-        <router-link v-else-if="!isLoggedIn" to="/login?role=dev" class="apply-btn">Inicia sesión para aplicar</router-link>
+
+        <h1 class="offer-title">{{ offer.puesto }}</h1>
+        <div class="offer-details">
+          <div class="detail-row">
+            <span class="material-icons-outlined">location_on</span>
+            <span>{{ offer.company_location }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">schedule</span>
+            <span>{{ offer.work_time }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">attach_money</span>
+            <span>{{ offer.salary }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">code</span>
+            <span>
+              {{ offer.tech_stack && offer.tech_stack.length ? offer.tech_stack.flatMap(sec => sec.items).join(', ') : 'Ninguna' }}
+            </span>
+          </div>
+        </div>
+
+
+        <div class="card-actions">
+          <button
+            v-if="canApply"
+            @click="applyToOffer(offer)"
+            class="apply-btn"
+            :disabled="appliedOffers.includes(offer.id)"
+          >
+            {{ appliedOffers.includes(offer.id) ? 'Ya aplicaste' : 'Aplicar' }}
+          </button>
+          <router-link
+            v-else-if="!isLoggedIn"
+            to="/login?role=dev"
+            class="apply-btn"
+          >Inicia sesión para aplicar</router-link>
+        </div>
       </div>
     </div>
+    
     <div class="pagination">
-      <button @click="prevPage" :disabled="page === 1">Anterior</button>
+      <button @click="prevPage" :disabled="page === 1"><span class="material-icons-outlined">arrow_back_ios</span></button>
       <span>Página {{ page }} de {{ pages }}</span>
-      <button @click="nextPage" :disabled="page === pages">Siguiente</button>
+      <button @click="nextPage" :disabled="page === pages"><span class="material-icons-outlined">arrow_forward_ios</span></button>
     </div>
   </div>
 </template>
@@ -154,85 +180,188 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+
+
 .offers-container {
+  position: relative;
   max-width: 1100px;
   margin: 2rem auto;
-  padding: 1rem;
+  padding: 2rem 1rem;
+  background: var(--black);
+  border-radius: 18px;
+  box-shadow: 0 2px 12px #0002;
+  color: var(--white);
 }
+h1 {
+  color: var(--green-light);
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
 .offers-header {
+  position: absolute;
+  top: 32px;
+  right: 32px;
   display: flex;
-  justify-content: flex-end;
   gap: 1rem;
-  margin-bottom: 1rem;
+  z-index: 100;
 }
+
 .auth-btn {
-  background: #1976d2;
-  color: #fff;
-  padding: 0.5rem 1.2rem;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: bold;
+  min-width: 130px;
+  width: auto;
+  padding: 0.6rem 1.5rem;
+  justify-content: center;
 }
+
+.auth-btn,
+.apply-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-decoration: none;
+}
+
+.auth-btn:hover,
+.apply-btn:hover {
+  background: transparent;
+  color: var(--green-light);
+  border-color: var(--green-light);
+}
+
+.apply-btn[disabled], .apply-btn:disabled {
+  background: #aaa !important;
+  color: #fff !important;
+  cursor: not-allowed;
+  border-color: #aaa !important;
+}
+
 .filters {
+  width: 100%;
   display: flex;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   align-items: center;
+  justify-content: space-around;
 }
-.filters input, .filters select {
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+
+.filters input,
+.filters select {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+  min-width: 140px;
 }
+
+.filters input:focus,
+.filters select:focus {
+  border: 1px solid var(--green-light);
+}
+
+
 .offers-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
+
 .offer-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1rem;
-  background: #fff;
+  border: 1px solid var(--green-light);
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: var(--black);
+  color: var(--white);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  justify-content: flex-start;
+  position: relative;
+  gap: 0.7rem;
+  box-shadow: 0 2px 8px #0002;
+  min-height: 420px;
 }
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  margin-right: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.apply-btn {
+  width: 100%;
+}
+
 .company-info {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
+
 .company-logo {
   width: 40px;
   height: 40px;
   object-fit: cover;
   border-radius: 50%;
+  border: 1px solid var(--green-light);
+  background: var(--smoke);
 }
+
 .company-name {
   font-weight: bold;
+  color: var(--green-light);
   font-size: 1.1rem;
 }
-.offer-description {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+
+.offer-title {
+  width: 80%;
+  font-size: 32px;
+  color: var(--white);
+  font-weight: 600;
+  margin: 0.5rem 0 1rem 0;
+  line-height: 1;
+  word-break: break-word;
 }
-.apply-btn {
-  background: #43a047;
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 0.5rem;
+
+.offer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
 }
-.apply-btn[disabled], .apply-btn:disabled {
-  background: #aaa !important;
-  color: #fff !important;
-  cursor: not-allowed;
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--white);
+  font-size: 15px;
 }
+
+.detail-row .material-icons-outlined {
+  color: var(--green-light);
+  font-size: 20px;
+}
+
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -240,4 +369,31 @@ onMounted(() => {
   gap: 1rem;
   margin-top: 2rem;
 }
+
+.pagination button {
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.material-icons-outlined {
+  font-size: 16px;
+}
+
+.pagination button:disabled {
+  background: #aaa !important;
+  color: #fff !important;
+  cursor: not-allowed;
+  border-color: #aaa !important;
+}
+
 </style>

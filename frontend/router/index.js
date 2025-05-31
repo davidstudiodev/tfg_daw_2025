@@ -102,6 +102,18 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  // Si el usuario está autenticado y va a la ruta de login de admin, redirigir al perfil de admin
+  if (to.name === 'admin-login') {
+    try {
+      const { data: user } = await getMe()
+      if (user.role === 'admin') return next({ name: 'admin-profile' })
+    } catch {
+      // No autenticado, puede ir a login de admin
+      return next()
+    }
+    return next()
+  }
+
   // Para el resto de rutas públicas
   return next()
 })

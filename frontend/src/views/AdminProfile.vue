@@ -1,7 +1,8 @@
 <template>
   <div class="admin-profile">
     <h1>Panel de Administrador</h1>
-    <button class="logout-btn" @click="logout">Cerrar sesión</button>
+    <button class="logout-btn" @click="logout">
+      <span class="material-icons-outlined">logout</span>Cerrar sesión</button>
     <div class="tabs">
       <button :class="{active: tab==='devs'}" @click="tab='devs'">Developers</button>
       <button :class="{active: tab==='companies'}" @click="tab='companies'">Empresas</button>
@@ -9,7 +10,13 @@
 
     <div v-if="tab==='devs'">
       <h2>Developers</h2>
-      <input v-model="devFilter" placeholder="Buscar por nombre o email..." />
+      <div class="filters">
+        <input v-model="devFilter" placeholder="Buscar por nombre o email..." />
+        <button class="edit-btn" @click="showPasswordModal = true">
+          <span class="material-icons-outlined">lock_reset</span>
+          Cambiar contraseña
+        </button>
+      </div>
       <table>
         <thead>
           <tr>
@@ -23,8 +30,10 @@
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
             <td>
-              <button @click="editUser(user)">Editar</button>
-              <button @click="deleteUser(user)">Eliminar</button>
+              <div class="table-actions">
+                <button @click="editUser(user)">Editar</button>
+                <button @click="deleteUser(user)">Eliminar</button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -33,7 +42,13 @@
 
     <div v-else>
       <h2>Empresas</h2>
-      <input v-model="companyFilter" placeholder="Buscar por nombre o email..." />
+      <div class="filters">
+        <input v-model="devFilter" placeholder="Buscar por nombre o email..." />
+        <button class="edit-btn" @click="showPasswordModal = true">
+          <span class="material-icons-outlined">lock_reset</span>
+          Cambiar contraseña
+        </button>
+      </div>
       <table>
         <thead>
           <tr>
@@ -47,8 +62,10 @@
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
             <td>
-              <button @click="editUser(user)">Editar</button>
-              <button @click="deleteUser(user)">Eliminar</button>
+              <div class="table-actions">
+                <button @click="editUser(user)">Editar</button>
+                <button @click="deleteUser(user)">Eliminar</button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -96,6 +113,65 @@
     </div>
     </div>
 
+    <!-- Modal para cambiar contraseña -->
+    <div v-if="showPasswordModal" class="modal-overlay">
+      <div class="modal">
+        <h3>Cambiar contraseña</h3>
+        <form @submit.prevent="changePassword">
+          <div class="form-group">
+            <label>Contraseña actual</label>
+            <div class="input-icon">
+              <span class="material-icons-outlined">lock</span>
+              <input
+                type="password"
+                v-model="passwordForm.current"
+                :class="{ 'input-error': passwordErrors.current }"
+                placeholder="Contraseña actual"
+              />
+            </div>
+            <span v-if="passwordErrors.current" class="input-error-message">{{ passwordErrors.current }}</span>
+          </div>
+          <div class="form-group">
+            <label>Nueva contraseña</label>
+            <div class="input-icon">
+              <span class="material-icons-outlined">lock_reset</span>
+              <input
+                type="password"
+                v-model="passwordForm.new"
+                :class="{ 'input-error': passwordErrors.new }"
+                @input="validatePasswordForm"
+                placeholder="Nueva contraseña"
+              />
+            </div>
+            <span v-if="passwordErrors.new" class="input-error-message">
+              {{ passwordErrors.new || 'Debe tener al menos 8 caracteres, una mayúscula y un número.' }}
+            </span>
+          </div>
+          <div class="form-group">
+            <label>Repetir nueva contraseña</label>
+            <div class="input-icon">
+              <span class="material-icons-outlined">lock</span>
+              <input
+                type="password"
+                v-model="passwordForm.repeat"
+                :class="{ 'input-error': passwordErrors.repeat }"
+                @input="validatePasswordForm"
+                placeholder="Repetir nueva contraseña"
+              />
+            </div>
+            <span v-if="passwordErrors.repeat" class="input-error-message">{{ passwordErrors.repeat }}</span>
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="save-btn">Guardar</button>
+            <button type="button" @click="closePasswordModal" class="cancel-btn">Cancelar</button>
+          </div>
+          <p v-if="passwordChangeSuccess" class="success">{{ passwordChangeSuccess }}</p>
+          <p v-if="passwordChangeError" class="error">{{ passwordChangeError }}</p>
+        </form>
+      </div>
+    </div>
+
+
 
   </div>
 </template>
@@ -137,7 +213,7 @@ async function fetchUsers() {
 }
 
 
-
+// Modal para editar usuario o empresa
 async function editUser(user) {
   if (tab.value === 'companies') {
     // Cargar datos de la empresa
@@ -181,6 +257,7 @@ function closeEditCompanyModal() {
   editCompanyData.value = {}
 }
 
+// Guardar cambios de empresa
 async function saveEditCompany() {
   try {
     await api.put(`/api/admin/companies/${editCompanyData.value.id}`, editCompanyData.value)
@@ -192,6 +269,8 @@ async function saveEditCompany() {
   }
 }
 
+
+// Modal para eliminar usuario o empresa
 async function deleteUser(user) {
   if (tab.value === 'companies') {
     if (confirm(`¿Eliminar empresa ${user.email}?`)) {
@@ -216,7 +295,7 @@ async function deleteUser(user) {
   }
 }
 
-
+// Función para cerrar sesión
 async function logout() {
   try {
     await api.post('/api/auth/logout')
@@ -227,58 +306,153 @@ async function logout() {
 }
 
 
+// Modal para cambiar contraseña
+const showPasswordModal = ref(false)
+const passwordForm = ref({ current: '', new: '', repeat: '' })
+const passwordErrors = ref({})
+const passwordChangeSuccess = ref('')
+const passwordChangeError = ref('')
+
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/
+
+function validatePasswordForm() {
+  passwordErrors.value = {}
+  if (!passwordForm.value.current) passwordErrors.value.current = 'Introduce tu contraseña actual.'
+  if (!passwordForm.value.new) passwordErrors.value.new = 'Introduce la nueva contraseña.'
+  else if (!passwordRegex.test(passwordForm.value.new))
+    passwordErrors.value.new = 'Debe tener al menos 8 caracteres, una mayúscula y un número.'
+  if (passwordForm.value.new !== passwordForm.value.repeat)
+    passwordErrors.value.repeat = 'Las contraseñas no coinciden.'
+  return Object.keys(passwordErrors.value).length === 0
+}
+
+async function changePassword() {
+  passwordChangeSuccess.value = ''
+  passwordChangeError.value = ''
+  if (!validatePasswordForm()) return
+  try {
+    await api.put('/api/auth/change-password', {
+      currentPassword: passwordForm.value.current,
+      newPassword: passwordForm.value.new
+    })
+    passwordChangeSuccess.value = 'Contraseña cambiada correctamente.'
+    alert('¡Contraseña cambiada correctamente!')
+    closePasswordModal()
+  } catch (e) {
+    passwordChangeError.value = e.response?.data?.message || 'Error al cambiar la contraseña.'
+  }
+}
+
+function closePasswordModal() {
+  showPasswordModal.value = false
+  passwordForm.value = { current: '', new: '', repeat: '' }
+  passwordErrors.value = {}
+  passwordChangeSuccess.value = ''
+  passwordChangeError.value = ''
+}
+
+
 onMounted(fetchUsers)
 </script>
 
 <style scoped>
+
 .admin-profile {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 2rem auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px #0001;
+  padding: 2.5rem 2rem;
+  background: var(--black);
+  border-radius: 18px;
+  box-shadow: 0 2px 12px #0002;
+  color: var(--white);
+  position: relative;
 }
 .tabs {
+  display: flex;
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 .tabs button {
-  margin-right: 1rem;
-  padding: 0.5rem 1.5rem;
-  border: none;
-  background: #eee;
+  background: transparent;
+  color: var(--green-light);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  border-radius: 4px 4px 0 0;
+  transition: background 0.2s, color 0.2s;
 }
-.tabs button.active {
-  background: #1976d2;
-  color: #fff;
+.tabs button.active,
+.tabs button:hover {
+  background: var(--green-light);
+  color: var(--black);
 }
+
+h1 {
+  color: var(--green-light);
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+h2 {
+  color: var(--green-light);
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
+  background: var(--black);
+  color: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
 }
 th, td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #eee;
+  padding: 0.8rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--green-light);
+  vertical-align: middle;
+}
+
+th {
+  background: var(--green-light);
+  color: var(--black);
+  font-weight: 600;
+  font-size: 1rem;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: #0008;
+  background: rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 .modal {
-  background: #fff;
+  background: var(--black);
+  color: var(--white);
   padding: 2rem;
-  border-radius: 8px;
+  border-radius: 20px;
   min-width: 320px;
-  max-width: 90vw;
+  max-width: 500px;
+  width: 100%;
+  border: 1px solid var(--green-light);
 }
 .modal-actions {
   margin-top: 1rem;
@@ -286,20 +460,115 @@ th, td {
   gap: 1rem;
   justify-content: flex-end;
 }
-
-.logout-btn {
-  float: right;
-  margin-top: -2.5rem;
+.modal input,
+.modal textarea {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
   margin-bottom: 1rem;
-  background: #c00;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 4px;
+  width: 100%;
+}
+.modal input:focus,
+.modal textarea:focus {
+  border: 1px solid var(--green-light);
+}
+
+.modal label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: var(--white);
+}
+
+button,
+input[type="submit"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--green-light);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+button:hover,
+input[type="submit"]:hover {
+  background: var(--green-light);
+  color: var(--black);
+}
+.logout-btn {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.7rem 2.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+  width: auto;
 }
 .logout-btn:hover {
-  background: #a00;
+  background: transparent;
+  color: var(--green-light);
+  border-color: var(--green-light);
 }
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.filters .edit-btn {
+  width: auto;
+}
+
+.filters input {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+  min-width: 250px;
+}
+
+.input-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon .material-icons-outlined {
+  position: absolute;
+  left: 16px;
+  top: 35%;
+  transform: translateY(-50%);
+  color: var(--green-light);
+  font-size: 22px;
+  pointer-events: none;
+}
+
+.input-icon input {
+  padding-left: 44px;
+  width: 100%;
+}
+
 
 </style>

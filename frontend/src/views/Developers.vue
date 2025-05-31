@@ -23,30 +23,110 @@
     <div v-else-if="developers.length === 0">No hay developers registrados.</div>
     <div class="dev-cards">
       <div v-for="dev in developers" :key="dev.id" class="dev-card">
-        <img v-if="dev.avatar" :src="dev.avatar" alt="Avatar" class="avatar" />
-        <div class="dev-info">
-          <h2>{{ dev.name }}</h2>
-          <p><strong>Profesión:</strong> {{ dev.profession }}</p>
-          <p><strong>Experiencia:</strong> {{ dev.years_experience }} años</p>
-          <p><strong>Ubicación:</strong> {{ dev.location }}</p>
-          <p><strong>Descripción:</strong> {{ dev.description }}</p>
-          <div v-if="dev.tech_stack && dev.tech_stack.length">
-            <strong>Tecnologías:</strong>
-            <ul>
-              <li v-for="section in dev.tech_stack" :key="section.category">
-                <span>{{ section.category }}:</span>
-                <span>{{ section.items.join(', ') }}</span>
-              </li>
-            </ul>
+        <div class="dev-header">
+          <img v-if="dev.avatar" :src="dev.avatar" alt="Avatar" class="avatar" />
+          <span class="dev-name">{{ dev.name }}</span>
+        </div>
+        <div class="dev-details">
+          <div class="detail-row">
+            <span class="material-icons-outlined">description</span>
+            <span>{{ dev.description }}</span>
           </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">work</span>
+            <span>{{ dev.profession }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">history_edu</span>
+            <span>{{ dev.years_experience }} año/s de experiencia</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">location_on</span>
+            <span>{{ dev.location }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">code</span>
+            <span>
+              <template v-if="dev.tech_stack && dev.tech_stack.length">
+                {{ dev.tech_stack.flatMap(sec => sec.items).join(', ') }}
+              </template>
+              <template v-else>
+                Ninguna
+              </template>
+            </span>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="apply-btn" @click="openModal(dev)">Ver perfil</button>
         </div>
       </div>
     </div>
     <div v-if="totalPages > 1" class="pagination">
-        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">Anterior</button>
-        <span>Página {{ currentPage }} de {{ totalPages }}</span>
-        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">Siguiente</button>
+      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">
+        <span class="material-icons-outlined">arrow_back_ios</span>
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">
+        <span class="material-icons-outlined">arrow_forward_ios</span>
+      </button>
     </div>
+
+
+    <!-- Modal de perfil de developer -->
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal-content">
+        <button class="close-btn" @click="closeModal">
+          <span class="material-icons-outlined">close</span>
+        </button>
+        <div class="dev-header">
+          <img v-if="selectedDev.avatar" :src="selectedDev.avatar" alt="Avatar" class="avatar" />
+          <span class="dev-name">{{ selectedDev.name }}</span>
+        </div>
+        <div class="dev-details">
+          <div class="detail-row">
+            <span class="material-icons-outlined">description</span>
+            <span>{{ selectedDev.description }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">work</span>
+            <span>{{ selectedDev.profession }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">history_edu</span>
+            <span>{{ selectedDev.years_experience }} año/s de experiencia</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">location_on</span>
+            <span>{{ selectedDev.location }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">code</span>
+            <span>
+              <template v-if="selectedDev.tech_stack && selectedDev.tech_stack.length">
+                {{ selectedDev.tech_stack.flatMap(sec => sec.items).join(', ') }}
+              </template>
+              <template v-else>
+                Ninguna
+              </template>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons-outlined">email</span>
+            <span>{{ selectedDev.email }}</span>
+          </div>
+        </div>
+        <div class="card-actions" style="justify-content: flex-end;">
+          <a
+            class="apply-btn"
+            :href="`mailto:${selectedDev.email}?subject=Contacto%20desde%20JobsXDevs`"
+            target="_blank"
+            rel="noopener"
+          >Contactar</a>
+        </div>
+      </div>
+    </div>
+
+
   </div>
 </template>
 
@@ -130,6 +210,18 @@ function goToPage(page) {
   }
 }
 
+// Logica del modal de perfil de developer
+const showModal = ref(false)
+const selectedDev = ref({})
+
+function openModal(dev) {
+  selectedDev.value = dev
+  showModal.value = true
+}
+function closeModal() {
+  showModal.value = false
+}
+
 onMounted(async () => {
   await checkAuth()
   await loadDevelopers()
@@ -138,62 +230,271 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
 .developers-list {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
+  position: relative;
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 2rem 1rem;
+  background: var(--black);
+  border-radius: 18px;
+  box-shadow: 0 2px 12px #0002;
+  color: var(--white);
 }
+
+.developers-header {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  display: flex;
+  gap: 1rem;
+  z-index: 100;
+}
+
+.auth-btn {
+  min-width: 130px;
+  width: auto;
+  padding: 0.6rem 1.5rem;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.auth-btn:hover {
+  background: transparent;
+  color: var(--green-light);
+  border-color: var(--green-light);
+}
+
+h1 {
+  color: var(--green-light);
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
+.filters {
+  width: 100%;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.filters input,
+.filters select {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+  min-width: 140px;
+}
+
+.filters input:focus,
+.filters select:focus {
+  border: 1px solid var(--green-light);
+}
+
 .dev-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
+
 .dev-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px #0001;
+  border: 1px solid var(--green-light);
+  border-radius: 18px;
   padding: 1.5rem;
-  min-width: 0;
+  background: var(--black);
+  color: var(--white);
   display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  box-shadow: 0 2px 8px #0002;
+  min-height: 400px;
+}
+
+.dev-header {
+  display: flex;
+  align-items: center;
   gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dev-name {
+  font-size: 2rem;
+  color: var(--green-light);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--green-light);
+  background: var(--smoke);
+  margin-bottom: 0.5rem;
+}
+
+.dev-info h2 {
+  color: var(--green-light);
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.dev-info p {
+  margin: 0.2rem 0;
+  color: var(--white);
+  font-size: 1rem;
+}
+
+.dev-info ul {
+  margin: 0.5rem 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dev-info li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--white);
+  font-size: 0.98rem;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  margin-right: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.apply-btn {
+  min-width: 130px;
+  width: auto;
+  padding: 0.6rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-decoration: none;
+}
+.apply-btn:hover {
+  background: transparent;
+  color: var(--green-light);
+  border-color: var(--green-light);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-content {
+  background: var(--black);
+  color: var(--white);
+  padding: 2rem;
+  border-radius: 20px;
+  min-width: 320px;
+  max-width: 500px;
+  height: 400px;
+  width: 100%;
+  border: 1px solid var(--green-light);
+  box-shadow: 0 2px 12px #0002;
+  position: relative;
+  display: flex;
   flex-direction: column;
 }
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 0px;
+  background: transparent;
+  border: none;
+  color: var(--green-light);
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--white);
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.detail-row .material-icons-outlined {
+  color: var(--green-light);
+  font-size: 20px;
+  min-width: 22px;
+  margin-top: 1px;
+  vertical-align: middle;
+}
+
 .pagination {
-  margin: 2rem 0 0 0;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
-}
-.avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.dev-info {
-  flex: 1;
-}
-.developers-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 2rem;
 }
 
-.auth-btn {
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  padding: 0.5em 1.2em;
-  border-radius: 4px;
-  font-weight: 500;
+.pagination button {
+  background: var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
   cursor: pointer;
-  text-decoration: none;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
-.auth-btn:hover {
-  background: #125ea7;
+
+.pagination button:disabled {
+  background: #aaa !important;
+  color: #fff !important;
+  cursor: not-allowed;
+  border-color: #aaa !important;
 }
+
+.pagination .material-icons-outlined {
+  font-size: 16px;
+}
+
 </style>
