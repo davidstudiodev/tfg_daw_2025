@@ -12,3 +12,7 @@ export const login = creds =>
 // Obtener el usuario actual desde /api/auth/me
 export const getMe = () =>
   api.get('/api/auth/me');
+
+// Logout que elimina la cookie HttpOnly
+export const logout = () =>
+  api.post('/api/auth/logout');

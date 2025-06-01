@@ -1,72 +1,399 @@
 <template>
   <div class="app">
     <header class="header">
-      <div class="logo">jobsxdevs</div>
+      <AppLogo />
 
-      <div class="toggle-container">
-        <label>
-          <input type="checkbox" v-model="isCompany" />
-          <span>{{ isCompany ? 'Empresa' : 'Developer' }}</span>
-        </label>
+      <!-- Botones de autenticación -->
+      <div class="auth-buttons" v-if="!isLoggedIn">
+        <button @click="goTo('register')">REGISTER</button>
+        <button @click="goTo('login')">LOGIN</button>
       </div>
 
-      <div class="auth-buttons">
-        <button @click="goTo('login')">Login</button>
-        <button @click="goTo('register')">Register</button>
+      <!-- Botones de perfil y logout -->
+      <div class="auth-buttons" v-else>
+        <button @click="goToProfile">Ir a mi perfil</button>
+        <button v-if="isLoggedIn" @click="handleLogout">Cerrar sesión</button>
       </div>
     </header>
 
     <main class="form-section">
-      <div v-if="isCompany">
-        <h2>Vista de Empresa</h2>
-        <!-- Aquí irá el formulario de empresa -->
+
+      <!-- Interruptor de vista -->
+      <div class="toggle-switch">
+        <label class="switch-label">
+          <input type="checkbox" class="checkbox" v-model="isCompany" />
+          <span class="slider">
+            <span class="switch-text left" :class="{ active: !isCompany }">DEVS</span>
+            <span class="switch-text right" :class="{ active: isCompany }">EMPRESAS</span>
+          </span>
+        </label>
       </div>
-      <div v-else>
-        <h2>Vista de Developer</h2>
-        <!-- Aquí irá el formulario de developer -->
+
+      <!-- Sección de empresa -->
+      <div v-if="isCompany" class="company-section">
+
+        <div class="company_mockups">
+          <img :src="companyIphone" alt="iPhone Mockup" />
+        </div>
+
+        <div class="company_text">
+          <h2>Encuentra devs <br>que encajan en tu stack</h2>
+          <p>Desarrolladores con las skills que tu equipo necesita. <br class="hide-on-mobile">Sin rodeos.</p>
+        </div>
+
       </div>
+      
+      <!-- Sección de desarrolladores -->
+      <div v-else class="devs-section">
+        <h2>Encuentra ofertas <br>hechas para tu stack</h2>
+        <p>Donde devs y tecnologías hacen match.</p>
+        
+        <div class="devs_mockups">
+          <img :src="devsMacbook" alt="Hero Image" />
+          <img :src="devsIphone" alt="Hero Image" />
+        </div>
+        
+      </div>
+
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import AppLogo from '../components/AppLogo.vue';
+import { logout, getMe } from '../services/auth.js';
+
+import devsMacbook from '../assets/devs_macbook.svg';
+import devsIphone from '../assets/devs_iphone.svg';
+import companyIphone from '../assets/company_iphone.svg';
 
 const isCompany = ref(false);
 const router = useRouter();
 
+const isLoggedIn = ref(false);
+const userRole = ref('');
+
+// Cargar los datos del usuario al iniciar
+getMe().then(() => isLoggedIn.value = true).catch(() => isLoggedIn.value = false)
+
+async function handleLogout() {
+  await logout()
+  router.push({ name: 'login' })
+}
+
 const goTo = (type) => {
   router.push({ name: type, query: { role: isCompany.value ? 'company' : 'developer' } });
 };
+
+// Redirigir al perfil según el rol del usuario
+const goToProfile = () => {
+  if (userRole.value === 'company') {
+    router.push({ name: 'company-profile' });
+  } else if (userRole.value === 'admin') {
+    router.push({ name: 'admin-profile' });
+  } else {
+    router.push({ name: 'dev-profile' });
+  }
+};
+
+// Verificar si el usuario está autenticado y su rol
+const checkAuth = async () => {
+  try {
+    const { data } = await getMe();
+    isLoggedIn.value = true;
+    userRole.value = data.role;
+    // Si es company, mostrar la vista de empresa por defecto
+    isCompany.value = data.role === 'company';
+  } catch {
+    isLoggedIn.value = false;
+    userRole.value = '';
+    isCompany.value = false;
+  }
+};
+
+onMounted(() => {
+  checkAuth();
+});
+
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .app {
   font-family: sans-serif;
   min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: #f4f4f4;
+  padding: 20px;
 }
 .logo {
   font-weight: bold;
   font-size: 1.5rem;
 }
-.toggle-container {
+
+.auth-buttons {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-end;
+  gap: 0.7rem;
 }
+
 .auth-buttons button {
-  margin-left: 0.5rem;
-}
+    margin-left: 0.5rem;
+    color: var(--green-light);
+    background-color: transparent;
+    border: 1px solid var(--green-light);
+    &:hover {
+      background-color: var(--green-light);
+      color: var(--black);
+    }
+  }
+
+
 .form-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 2rem;
   text-align: center;
+  
+  h2 {
+    color: var(--white);
+    font-size: 64px;
+    line-height: 60px;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  p {
+    color: var(--white);
+    font-size: 20px;
+    line-height: 30px;
+    font-weight: 400;
+    margin-top: 1rem;
+  }
 }
+
+.company-section {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+
+
+  .company_mockups {
+    display: flex;
+    justify-content: center;
+    img {
+      width: 100%;
+      max-width: 400px;
+    }
+  }
+  .company_text {
+    max-width: 500px;
+    text-align: left;
+    margin-top: 150px;
+    h2 {
+      font-weight: 500;
+    }
+    p {
+      font-size: 20px;
+      line-height: 20px;
+      font-weight: 400;
+    }
+  }
+}
+
+.devs_mockups {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: -40px;
+  position: relative;
+  height: 220px;
+}
+.devs_mockups img:first-child {
+  max-width: 90vw;
+  z-index: 1;
+}
+
+.devs_mockups img:last-child {
+  max-width: 40vw;
+  margin-left: -250px;
+  z-index: 2;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 245px;
+  height: 45px;
+  margin: 0 1rem;
+  --light: var(--green-light);
+  --dark: var(--black);
+}
+
+.switch-label {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: var(--dark);
+  cursor: pointer;
+  border: 2px solid var(--dark);
+  display: block;
+}
+
+.checkbox {
+  position: absolute;
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  width: 95%;
+  height: 100%;
+  border-radius: 50px;
+  border: 1px solid var(--green-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--green-light);
+  user-select: none;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+}
+
+.switch-text {
+  z-index: 2;
+  flex: 1 1 0;
+  text-align: center;
+  opacity: 0.7;
+  transition: opacity 0.3s, color 0.3s;
+  padding: 0 8px;
+  &.active {
+    opacity: 1;
+    color: var(--dark);
+  }
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 40px;
+  border-radius: 50px;
+  background-color: var(--light);
+  transition: transform 0.3s;
+  z-index: 1;
+}
+
+.checkbox:checked ~ .slider::before {
+  transform: translateX(115px);
+}
+
+.checkbox:not(:checked) ~ .slider::before {
+  transform: translateX(0);
+}
+
+
+//Responsive styles
+
+@media (max-width: 900px) {
+  .devs_mockups {
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    margin-top: 0;
+  }
+  .devs_mockups img:first-child {
+    display: none; // Oculta Macbook
+  }
+  .devs_mockups img:last-child {
+    max-width: 80vw;
+    margin-left: 0;
+    display: block;
+    margin-top: 0; 
+  }
+  .form-section h2 {
+    font-size: 40px;
+    line-height: 40px;
+  }
+  
+  .form-section p {
+    text-align: center;
+    font-size: 16px;
+    
+  }
+}
+
+@media (max-width: 600px) {
+  .auth-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.7rem;
+  }
+  .devs_mockups img:last-child {
+    max-width: 95vw;
+    margin-top: -70px; 
+  }
+}
+
+@media (max-width: 900px) {
+  .hide-on-mobile {
+    display: none;
+  }
+  .company-section {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .company_mockups {
+      order: 2;
+      margin-top: 1.5rem;
+      img {
+        max-width: 80vw;
+        margin: 0 auto;
+        display: block;
+      }
+    }
+    .company_text {
+      order: 1;
+      margin-top: 0;
+      text-align: center;
+      max-width: 100%;
+      h2 {
+        font-size: 40px;
+        line-height: 40px;
+      }
+      p {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .company-section .company_mockups img {
+    max-width: 95vw;
+    margin-top: -70px;
+  }
+  .company-section .company_text h2 {
+    font-size: 40px;
+    line-height: 40px;
+  }
+  .company-section .company_text p {
+    font-size: 16px;
+  }
+}
+
 </style>

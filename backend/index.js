@@ -10,9 +10,13 @@ import authRoutes from './routes/auth.routes.js';
 import protectedRoutes from './routes/protected.routes.js';
 import devRoutes from './routes/dev.routes.js'
 import companyRoutes from './routes/company.routes.js'
+import offersRoutes from './routes/offers.routes.js';
 
 // Import DB connection
 import db from './config/db.js';
+
+// Import admin routes
+import adminRoutes from './routes/admin.routes.js'
 
 dotenv.config();
 const app = express();
@@ -25,7 +29,9 @@ app.use(cors({
   credentials: true                 // permite envíar cookies
 }))
 app.use(cookieParser())
-app.use(express.json())
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
+
 
 // Connect to DB
 db();
@@ -35,6 +41,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
 app.use('/api/dev', devRoutes)
 app.use('/api/company', companyRoutes)
+app.use('/api/offers', offersRoutes)
+
+app.use('/api/admin', adminRoutes)
 
 // 404 handler
 app.use((req, res) => {

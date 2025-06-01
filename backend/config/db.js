@@ -2,6 +2,7 @@ import mysql from 'mysql2/promise';
 
 let pool;
 
+// Función para conectar a la base de datos MySQL
 export default async function db() {
   try {
     pool = await mysql.createPool({
