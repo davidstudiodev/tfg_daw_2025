@@ -7,7 +7,7 @@ import validateRequest from '../middlewares/validateRequest.js'
 
 const router = express.Router()
 
-// Ejemplo: listar todos los usuarios
+// Obtener todos los usuarios (developers y companies)
 router.get('/users', authMiddleware, isAdmin, async (req, res) => {
   try {
     const [users] = await pool.query('SELECT id, name, email, role, created_at FROM users')
@@ -92,7 +92,7 @@ router.delete('/users/:id', authMiddleware, isAdmin, async (req, res) => {
   }
 })
 
-
+// Crear una nueva empresa
 router.put(
   '/companies/:id',
   authMiddleware,
@@ -126,6 +126,7 @@ router.put(
   }
 )
 
+// Obtener todos los datos de una empresa
 router.get('/companies/:id', authMiddleware, isAdmin, async (req, res) => {
   const companyId = req.params.id
   try {
@@ -144,7 +145,7 @@ router.get('/companies/:id', authMiddleware, isAdmin, async (req, res) => {
   }
 })
 
-
+// Eliminar una empresa
 router.delete('/companies/:id', authMiddleware, isAdmin, async (req, res) => {
   const companyId = req.params.id
   try {

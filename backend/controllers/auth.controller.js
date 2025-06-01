@@ -5,6 +5,7 @@ import { createUser, findUserByEmail } from '../models/User.js';
 import { sendMail } from '../utils/mailer.js';
 import crypto from 'crypto';
 
+// Verifica si el usuario ya existe y crea un nuevo usuario
 export const register = async (req, res) => {
   const { name, email, password, role } = req.body;
   try {
@@ -43,25 +44,26 @@ export const register = async (req, res) => {
   }
 };
 
+// Inicia sesión verificando las credenciales del usuario
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    // 1) Verificar usuario
+    // Verificar usuario
     const user = await findUserByEmail(email);
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // 2) Comparar password
+    // Comparar password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // 3) Generar token
+    // Generar token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
-    // 4) Enviar cookie HttpOnly
+    // Enviar cookie HttpOnly
     return res
       .cookie('token', token, {
         httpOnly: true,
@@ -78,6 +80,7 @@ export const login = async (req, res) => {
   }
 };
 
+// Obtiene los datos del usuario autenticado
 export const me = (req, res) => {
   res.json({
     id: req.user.id,
@@ -105,21 +108,21 @@ export const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   try {
-    // 1. Busca el usuario por ID
+    // Busca el usuario por ID
     const [[user]] = await pool.query(
       'SELECT password FROM users WHERE id = ?',
       [userId]
     );
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
 
-    // 2. Verifica la contraseña actual
+    // Verifica la contraseña actual
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) return res.status(400).json({ message: 'La contraseña actual no es correcta.' });
 
-    // 3. Hashea la nueva contraseña
+    // Hashea la nueva contraseña
     const hashed = await bcrypt.hash(newPassword, 10);
 
-    // 4. Actualiza la contraseña
+    // Actualiza la contraseña
     await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashed, userId]);
 
     res.json({ message: 'Contraseña actualizada correctamente.' });
@@ -132,7 +135,6 @@ export const changePassword = async (req, res) => {
 
 // Envía un enlace de recuperación de contraseña al email del usuario
 export const forgotPassword = async (req, res) => {
-  console.log('forgotPassword endpoint called', req.body);
   const { email } = req.body;
   try {
     // Busca usuario por email (dev o company)

@@ -1,4 +1,6 @@
 <template>
+
+  <!-- Contenedor de restablecimiento de contraseña -->
   <div class="reset-password-container">
     <h2>Restablecer contraseña</h2>
     <form @submit.prevent="resetPassword">
@@ -33,6 +35,7 @@ const errors = ref({})
 const success = ref('')
 const error = ref('')
 
+// Validación de campos
 function validate() {
   errors.value = {}
   if (!form.value.new || form.value.new.length < 6) errors.value.new = 'La contraseña debe tener al menos 6 caracteres.'
@@ -40,6 +43,7 @@ function validate() {
   return Object.keys(errors.value).length === 0
 }
 
+// Función para restablecer la contraseña
 async function resetPassword() {
   success.value = ''
   error.value = ''

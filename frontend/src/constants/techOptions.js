@@ -1,3 +1,6 @@
+
+// Este archivo contiene las opciones de tecnologías que se pueden seleccionar en el formulario
+
 export const techOptions = [
   {
     category: 'Frontend',

@@ -7,10 +7,7 @@
     </button>
   
   <div class="profile-content">
-    <!-- Notificaciones -->
     <p v-if="error" class="error">{{ error }}</p>
-
-    <!-- Estado de carga -->
     <div v-if="loading">Cargando perfil…</div>
 
     <!-- Resumen de perfil -->
@@ -65,7 +62,6 @@
         </button>
       </div>
     </section>
-
 
     <!-- Modal para cambiar contraseña -->
     <div v-if="showPasswordModal" class="modal-overlay">
@@ -297,9 +293,7 @@
       </div>
     </section>
 
-
   </div>
-
 
   </div>
 </template>
@@ -323,7 +317,7 @@ const error = ref('');
 const isEditing = ref(false);
 const fieldErrors = ref({});
 
-// Reactive form data
+// Formulario de perfil del desarrollador
 const form = ref({
   name: '',
   email: '',
@@ -336,10 +330,9 @@ const form = ref({
   avatar: ''
 });
 
-// Selected tech items
 const selected = ref([]);
 
-// Computed from form.tech_stack to display
+// Opciones de tecnologías
 const allTech = computed(() =>
   Array.isArray(form.value.tech_stack)
     ? form.value.tech_stack
@@ -351,24 +344,21 @@ const allTech = computed(() =>
 const applications = ref([]);
 const loadingApplications = ref(false);
 
+// Cargar perfil del desarrollador
 async function loadProfile() {
   loading.value = true;
   try {
     const { data } = await getDevProfile();
     let tech_stack = data.tech_stack;
-    console.log('Respuesta del backend:', data); // <-- LOG 1
 
     if (typeof tech_stack === 'string') {
       try {
         tech_stack = JSON.parse(tech_stack);
-        console.log('tech_stack parseado:', tech_stack); // <-- LOG 2
       } catch {
         tech_stack = [];
-        console.log('tech_stack no se pudo parsear, se deja como []'); // <-- LOG 3
       }
     }
     if (!Array.isArray(tech_stack)) {
-      console.log('tech_stack NO es array, se deja como []'); // <-- LOG 4
       tech_stack = [];
     }
 
@@ -383,14 +373,11 @@ async function loadProfile() {
       tech_stack,
       avatar: data.avatar || ''
     };
-    console.log('form.value.tech_stack final:', form.value.tech_stack); // <-- LOG 5
 
     selected.value = Array.isArray(tech_stack)
       ? tech_stack.flatMap(sec => sec.items)
       : [];
-    console.log('selected.value:', selected.value); // <-- LOG 6
   } catch (e) {
-    console.log('Error en loadProfile:', e); // <-- LOG 7
     isEditing.value = true;
   } finally {
     loading.value = false;
@@ -441,15 +428,12 @@ function toggleTech(item) {
 function validateForm() {
   fieldErrors.value = {};
 
-  // Nombre
   if (!form.value.name || form.value.name.trim().length === 0) {
     fieldErrors.value.name = 'El nombre es obligatorio.';
   }
-  // Correo
   if (!form.value.email || !/^\S+@\S+\.\S+$/.test(form.value.email)) {
     fieldErrors.value.email = 'El correo no es válido.';
   }
-  // Profesión
   if (!form.value.profession || form.value.profession.trim().length === 0) {
     fieldErrors.value.profession = 'La profesión es obligatoria.';
   }
@@ -457,15 +441,12 @@ function validateForm() {
   if (!/^\d{7,}$/.test(form.value.phone)) {
     fieldErrors.value.phone = 'El teléfono debe tener solo números y al menos 7 dígitos.';
   }
-  // Biografía
   if (!form.value.description || form.value.description.trim().length < 10) {
     fieldErrors.value.description = 'La biografía debe tener al menos 10 caracteres.';
   }
-  // Años de experiencia
   if (!Number.isInteger(form.value.years_experience) || form.value.years_experience < 0) {
     fieldErrors.value.years_experience = 'Debe ser un número entero positivo.';
   }
-  // Ubicación
   if (!form.value.location || form.value.location.trim().length === 0) {
     fieldErrors.value.location = 'La ubicación es obligatoria.';
   }
@@ -489,7 +470,6 @@ async function saveProfile() {
     items: sec.items.filter(i => selected.value.includes(i))
   })).filter(sec => sec.items.length > 0);
 
-  console.log('Enviando tech_stack:', form.value.tech_stack);
 
   try {
     await updateDevProfile(form.value)
@@ -501,11 +481,6 @@ async function saveProfile() {
   } finally {
     saving.value = false;
   }
-}
-
-async function handlePublish() {
-  await saveProfile();
-  router.push({ path: '/developers' });
 }
 
 async function handleLogout() {
@@ -522,7 +497,7 @@ function cancelEdit() {
   loadProfile(); // Recarga los datos originales
 }
 
-
+// Modal para cambiar contraseña
 const showPasswordModal = ref(false)
 const passwordForm = ref({ current: '', new: '', repeat: '' })
 const passwordErrors = ref({})
@@ -586,6 +561,7 @@ onMounted(() => {
   loadProfile();
   loadApplications();
 });
+
 </script>
 
 <style lang="scss" scoped>

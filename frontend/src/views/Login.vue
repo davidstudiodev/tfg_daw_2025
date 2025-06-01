@@ -4,7 +4,8 @@
     <div class="auth-container">
       <h2>Login</h2>
       <h3>¡Bienvenido/a {{ roleLabel }}!</h3>
-  
+      
+      <!-- Login -->
       <form v-if="!showForgotPassword" @submit.prevent="submitForm" class="auth-form">
         Correo electrónico
         <div class="input-icon">
@@ -35,7 +36,7 @@
         <p v-if="error" class="error">{{ error }}</p>
       </form>
 
-    
+      <!-- Modal de recuperación de contraseña -->
       <div v-if="showForgotPassword" class="forgot-password-modal">
         <form @submit.prevent="sendResetEmail">
           <label>  
@@ -51,13 +52,14 @@
         <button @click="showForgotPassword = false" class="cancel-btn">CANCELAR</button>
       </div>
       
-      <!--  -->
+      <!-- Enlace de registro -->
       <p>
         No tienes cuenta?
         <router-link :to="{ name: 'register', query: { role } }">
           Registrarse
         </router-link>
       </p>
+
     </div>
 
   </div>
@@ -68,20 +70,17 @@ import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import AppLogo from '../components/AppLogo.vue'
-
-// 1) Importamos los servicios en lugar de axios directamente
 import { login, getMe } from '../services/auth.js'
 
 const route = useRoute()
 const router = useRouter()
 
-// 2) Obtenemos el role del query
+// Obtenemos el rol desde la query de la ruta
 const role = ref(route.query.role === 'company' ? 'company' : 'dev')
 const roleLabel = computed(() =>
   role.value === 'company' ? 'Empresa' : 'Developer'
 )
 
-// 3) Estado del formulario y notificaciones
 const form = ref({ email: '', password: '' })
 const loading = ref(false)
 const error = ref('')
@@ -91,13 +90,12 @@ const submitForm = async () => {
   error.value = ''
 
   try {
-    // 4) Hacemos login; el backend envía la cookie HttpOnly automáticamente
     await login({ email: form.value.email, password: form.value.password })
 
-    // 5) Consultamos /api/auth/me para obtener { id, email, role }
+    // Consultar /api/auth/me para obtener { id, email, role }
     const { data: user } = await getMe()
 
-    // 6) Redirigimos según el role que venga del servidor
+    // Redirección según el role que venga del servidor
     const destination =
       user.role === 'company'
         ? { name: 'company-profile' }
@@ -105,7 +103,6 @@ const submitForm = async () => {
     router.push(destination)
 
   } catch (err) {
-    // 7) Mensaje de error según status
     const status = err.response?.status
     error.value =
       status === 400
@@ -113,7 +110,6 @@ const submitForm = async () => {
         : 'Error al iniciar sesión. Intenta más tarde.'
   } finally {
     loading.value = false
-    // 8) Limpiamos el formulario
     form.value.email = ''
     form.value.password = ''
   }
@@ -137,7 +133,6 @@ async function sendResetEmail() {
     resetMessage.value = 'No se pudo enviar el correo. Intenta de nuevo.'
   }
 }
-
 
 </script>
 

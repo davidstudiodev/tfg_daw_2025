@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Función para enviar correos electrónicos
 export const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -10,6 +11,7 @@ export const transporter = nodemailer.createTransport({
   }
 });
 
+// Configuración del transportador para enviar correos electrónicos
 export async function sendMail({ to, subject, html }) {
   return transporter.sendMail({
     from: `"JobsXDevs" <${process.env.EMAIL_USER}>`,

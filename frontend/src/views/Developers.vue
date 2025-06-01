@@ -21,6 +21,8 @@
 
     <div v-if="loading">Cargando...</div>
     <div v-else-if="developers.length === 0">No hay developers registrados.</div>
+    
+    <!-- Lista de Developers -->
     <div class="dev-cards">
       <div v-for="dev in developers" :key="dev.id" class="dev-card">
         <div class="dev-header">
@@ -61,6 +63,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Paginación -->
     <div v-if="totalPages > 1" class="pagination">
       <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">
         <span class="material-icons-outlined">arrow_back_ios</span>
@@ -70,7 +74,6 @@
         <span class="material-icons-outlined">arrow_forward_ios</span>
       </button>
     </div>
-
 
     <!-- Modal de perfil de developer -->
     <div v-if="showModal" class="modal-overlay">
@@ -126,7 +129,6 @@
       </div>
     </div>
 
-
   </div>
 </template>
 
@@ -165,7 +167,7 @@ const filterLocation = ref('')
 const totalPages = ref(1)
 const totalDevelopers = ref(0)
 
-
+// Función para cargar los desarrolladores
 async function loadDevelopers() {
   loading.value = true
   try {
@@ -197,7 +199,7 @@ watch([filterName, filterProfession, filterLocation], () => {
   loadDevelopers()
 })
 
-
+// Función para redirigir al perfil del usuario
 function goToProfile() {
   if (userRole.value === 'dev') router.push({ name: 'dev-profile' })
   else if (userRole.value === 'company') router.push({ name: 'company-profile' })

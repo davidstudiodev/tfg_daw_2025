@@ -34,7 +34,6 @@ router.put(
 )
 
 // Gestión de ofertas
-// Cambiar validaciones de ofertas de trabajo a 'puesto'
 router.post(
   '/jobs',
   createJobLimiter,

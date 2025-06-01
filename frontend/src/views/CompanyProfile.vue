@@ -467,6 +467,7 @@ const loadProfile = async () => {
   }
 }
 
+// Función para manejar el cambio de avatar
 function handleAvatarChange(event) {
   const file = event.target.files[0]
   if (!file) return
@@ -485,6 +486,7 @@ function cancelEditProfile() {
   loadProfile()
 }
 
+// Función para validar el formulario de perfil de empresa
 const fieldErrors = ref({});
 function validateCompanyProfile() {
   fieldErrors.value = {};
@@ -536,6 +538,7 @@ async function saveProfile() {
   }
 }
 
+// Funciones para crear y editar ofertas
 function startCreatingJob() {
   isCreatingJob.value = true
   job.value = {
@@ -584,6 +587,7 @@ function validateJob() {
   return Object.keys(fieldErrors.value).length === 0;
 }
 
+// Funcion para publicar una oferta
 async function publishJob() {
   error.value = '';
   success.value = '';
@@ -756,8 +760,6 @@ async function changePassword() {
     passwordChangeError.value = e.response?.data?.message || 'Error al cambiar la contraseña.'
   }
 }
-
-
 
 onMounted(() => {
   loadProfile();
@@ -1525,6 +1527,5 @@ label {
   margin-top: 20px;
   text-align: left;
 }
-
 
 </style>

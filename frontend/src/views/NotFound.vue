@@ -1,4 +1,6 @@
 <template>
+
+  <!-- Contenedor de la página no encontrada -->
   <div class="not-found-container">
     <h1>404</h1>
     <p>Página no encontrada</p>
@@ -10,7 +12,6 @@
 </template>
 
 <script setup>
-// No logic needed
 </script>
 
 <style scoped>

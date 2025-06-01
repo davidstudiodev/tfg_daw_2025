@@ -1,6 +1,7 @@
 import { pool } from '../config/db.js';
 import { sendMail } from '../utils/mailer.js';
 
+// Función para obtener el perfil de la empresa
 export const getCompanyProfile = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -45,7 +46,7 @@ export const updateCompanyProfile = async (req, res) => {
   }
 };
 
-// Al crear oferta
+// Función para crear una oferta de trabajo
 export const createJob = async (req, res) => {
   const companyId = req.user.id;
   const { puesto, sector, salary, work_mode, work_time, tech_stack } = req.body;
@@ -76,6 +77,7 @@ export const createJob = async (req, res) => {
   }
 };
 
+// Listar todas las ofertas de la empresa
 export const listJobsByCompany = async (req, res) => {
   const companyId = req.user.id;
   try {
@@ -114,7 +116,7 @@ export const getCompanyJobs = async (req, res) => {
   }
 };
 
-// Al editar oferta
+// Función para actualizar una oferta de trabajo
 export const updateJob = async (req, res) => {
   const companyId = req.user.id;
   const jobId = req.params.id;

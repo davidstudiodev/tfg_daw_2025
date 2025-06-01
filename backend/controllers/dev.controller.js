@@ -20,10 +20,7 @@ export const getDeveloperProfile = async (req, res) => {
 
     const profile = rows[0];
 
-    // ![DEBUG] Log the profile before parsing
-    console.log('Perfil dev antes de parsear:', profile);
-
-    // Parse tech_stack safely, default to empty array
+    // Asegura que los campos tech_stack y avatar estén en el formato correcto
     if (!profile.tech_stack) {
       profile.tech_stack = [];
     } else if (typeof profile.tech_stack === 'string') {
@@ -192,6 +189,7 @@ export const listDevelopers = async (req, res) => {
   }
 };
 
+// Crear una nueva aplicación
 export const deleteApplication = async (req, res) => {
   const devId = req.user.id;
   const applicationId = req.params.id;

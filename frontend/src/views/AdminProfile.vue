@@ -8,6 +8,7 @@
       <button :class="{active: tab==='companies'}" @click="tab='companies'">Empresas</button>
     </div>
 
+    <!-- Lista de Developers -->
     <div v-if="tab==='devs'">
       <h2>Developers</h2>
       <div class="filters">
@@ -44,6 +45,8 @@
       </table>
     </div>
 
+
+    <!-- Lista de Empresas -->
     <div v-else>
       <h2>Empresas</h2>
       <div class="filters">
@@ -236,12 +239,12 @@ const filteredCompanies = computed(() =>
   )
 )
 
+// Función para obtener la lista de usuarios y empresas
 async function fetchUsers() {
   const { data } = await api.get('/api/admin/users')
   devs.value = data.filter(u => u.role === 'dev')
   companies.value = data.filter(u => u.role === 'company')
 }
-
 
 // Modal para editar usuario o empresa
 async function editUser(user) {
@@ -255,7 +258,7 @@ async function editUser(user) {
       toast.error('Error al cargar los datos de la empresa')
     }
   } else {
-    // Developer
+    // Cargar datos del usuario
     try {
       const { data } = await api.get(`/api/admin/users/${user.id}`)
       editUserData.value = { ...data }
@@ -271,6 +274,7 @@ function closeEditModal() {
   editUserData.value = {}
 }
 
+// Guardar cambios de usuario
 async function saveEdit() {
   try {
     await api.put(`/api/admin/users/${editUserData.value.id}`, editUserData.value)
@@ -298,7 +302,6 @@ async function saveEditCompany() {
     toast.error('Error al guardar los cambios')
   }
 }
-
 
 // Modal para eliminar usuario o empresa
 async function deleteUser(user) {

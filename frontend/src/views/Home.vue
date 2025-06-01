@@ -3,10 +3,13 @@
     <header class="header">
       <AppLogo />
 
+      <!-- Botones de autenticación -->
       <div class="auth-buttons" v-if="!isLoggedIn">
         <button @click="goTo('register')">REGISTER</button>
         <button @click="goTo('login')">LOGIN</button>
       </div>
+
+      <!-- Botones de perfil y logout -->
       <div class="auth-buttons" v-else>
         <button @click="goToProfile">Ir a mi perfil</button>
         <button v-if="isLoggedIn" @click="handleLogout">Cerrar sesión</button>
@@ -15,6 +18,7 @@
 
     <main class="form-section">
 
+      <!-- Interruptor de vista -->
       <div class="toggle-switch">
         <label class="switch-label">
           <input type="checkbox" class="checkbox" v-model="isCompany" />
@@ -25,6 +29,7 @@
         </label>
       </div>
 
+      <!-- Sección de empresa -->
       <div v-if="isCompany" class="company-section">
 
         <div class="company_mockups">
@@ -38,6 +43,7 @@
 
       </div>
       
+      <!-- Sección de desarrolladores -->
       <div v-else class="devs-section">
         <h2>Encuentra ofertas <br>hechas para tu stack</h2>
         <p>Donde devs y tecnologías hacen match.</p>
@@ -48,6 +54,7 @@
         </div>
         
       </div>
+
     </main>
   </div>
 </template>
@@ -68,6 +75,7 @@ const router = useRouter();
 const isLoggedIn = ref(false);
 const userRole = ref('');
 
+// Cargar los datos del usuario al iniciar
 getMe().then(() => isLoggedIn.value = true).catch(() => isLoggedIn.value = false)
 
 async function handleLogout() {
@@ -79,6 +87,7 @@ const goTo = (type) => {
   router.push({ name: type, query: { role: isCompany.value ? 'company' : 'developer' } });
 };
 
+// Redirigir al perfil según el rol del usuario
 const goToProfile = () => {
   if (userRole.value === 'company') {
     router.push({ name: 'company-profile' });
@@ -89,6 +98,7 @@ const goToProfile = () => {
   }
 };
 
+// Verificar si el usuario está autenticado y su rol
 const checkAuth = async () => {
   try {
     const { data } = await getMe();

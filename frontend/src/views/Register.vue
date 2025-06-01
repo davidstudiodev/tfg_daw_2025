@@ -6,6 +6,7 @@
       <h2>Register</h2>
       <h3>¡Bienvenido/a {{ roleLabel }}!</h3>
 
+      <!-- Formulario de registro -->
       <form @submit.prevent="submitForm" class="auth-form">
         
         Nombre
@@ -49,23 +50,24 @@
         </button>
         <p v-if="error" class="error">{{ error }}</p>
       </form>
+
+      <!-- Enlace para iniciar sesión -->
       <p>
         Ya tienes cuenta?
         <router-link :to="{ name: 'login', query: { role } }">
           Iniciar sesión
         </router-link>
       </p>
+
     </div>
   </div>
 </template>
 
 <script setup>
 
-
-// 2) Importar solo lo que necesitamos de los servicios
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { register as registerUser } from '../services/auth.js'  // << importa tu service
+import { register as registerUser } from '../services/auth.js'
 
 import AppLogo from '../components/AppLogo.vue'
 
@@ -75,13 +77,11 @@ const toast = useToast();
 const route = useRoute()
 const router = useRouter()
 
-// 3) Leer rol del query param
 const role = ref(route.query.role === 'company' ? 'company' : 'dev')
 const roleLabel = computed(() =>
   role.value === 'company' ? 'Empresa' : 'Developer'
 )
 
-// 4) Estado del formulario, loading y error
 const form = ref({ name: '', email: '', password: '' })
 const loading = ref(false)
 const error = ref('')
@@ -108,7 +108,7 @@ const submitForm = async () => {
   }
 
   try {
-    // 5) Llamada al service en lugar de axios directamente
+    // Llamada al service en lugar de axios directamente
     await registerUser({
       name: form.value.name,
       email: form.value.email,
@@ -118,16 +118,14 @@ const submitForm = async () => {
 
     toast.info('¡Te has registrado! Ahora puedes iniciar sesión.')
 
-    // 6) Redirigir tras registro correcto
+    // Redirigir tras registro correcto
     router.push({ name: 'login', query: { role: role.value } })
 
   } catch (err) {
-    // 7) Mostrar mensaje de error real
     error.value =
       err.response?.data?.message ||
       'Ha ocurrido un error al registrar. Intenta de nuevo.'
   } finally {
-    // 8) Reset de estado y formulario
     loading.value = false
     form.value = { name: '', email: '', password: '' }
   }

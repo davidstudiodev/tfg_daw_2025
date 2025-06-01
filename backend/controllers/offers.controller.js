@@ -45,7 +45,7 @@ export const listOffers = async (req, res) => {
        LIMIT ? OFFSET ?`,
       [...params, limit, offset]
     );
-    // Parsear tech_stack
+    // Verifica y parsea tech_stack
     offers.forEach(offer => {
       if (typeof offer.tech_stack === 'string') {
         try { offer.tech_stack = JSON.parse(offer.tech_stack); } catch { offer.tech_stack = []; }

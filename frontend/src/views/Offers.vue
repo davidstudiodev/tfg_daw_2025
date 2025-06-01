@@ -1,4 +1,6 @@
 <template>
+
+  <!-- Contenedor de ofertas -->
   <div class="offers-container">
     <AppLogo />
     <div class="offers-header" v-if="!isLoggedIn">
@@ -132,6 +134,7 @@ const fetchAppliedOffers = async () => {
   }
 };
 
+// Verifica si el usuario está autenticado y su rol
 const checkAuth = async () => {
   try {
     const { data } = await getMe();
@@ -153,6 +156,7 @@ const goToCompanyProfile = () => {
   router.push({ name: 'company-profile' });
 };
 
+// Aplica a una oferta
 async function applyToOffer(offer) {
   try {
     await api.post(`/api/offers/${offer.id}/apply`);
