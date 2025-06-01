@@ -25,7 +25,7 @@ const app = express();
 
 app.use(morgan('dev'));
 app.use(cors({
-  origin: 'http://localhost:5173',  // o tu dominio frontend
+  origin: 'https://www.jobsxdevs.com',  // o tu dominio frontend
   credentials: true                 // permite envíar cookies
 }))
 app.use(cookieParser())
