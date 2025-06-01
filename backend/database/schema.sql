@@ -77,4 +77,4 @@ ALTER TABLE users AUTO_INCREMENT = 1;
 
 -- Insertar usuario admin por defecto
 INSERT INTO users (name, email, password, role)
-VALUES ('Admin', 'admin@jobsxdevs', '$2b$10$5VMYd1/jL0fV6ULVj38zyOV2wKBiI7RlHffd8teDfxvBwwoDlnr92', 'admin');
+VALUES ('Admin', 'davidstudiosco@gmail.com', '$2b$10$EHeVHBQSRhoBVgv044Sl3.YyuGUvFaHe2CmsG1SSfDxklCvKFPBI6', 'admin');
