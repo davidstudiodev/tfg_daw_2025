@@ -4,6 +4,8 @@ import { pool } from '../config/db.js';
 import { createUser, findUserByEmail } from '../models/User.js';
 import { sendMail } from '../utils/mailer.js';
 import crypto from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Verifica si el usuario ya existe y crea un nuevo usuario
 export const register = async (req, res) => {
@@ -67,8 +69,8 @@ export const login = async (req, res) => {
     return res
       .cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // HTTPS solo en prod
-        sameSite: 'lax',
+        secure: true, 
+        sameSite: 'none',
         maxAge: 24 * 60 * 60 * 1000 // 1 día en ms
       })
       .status(200)
@@ -150,7 +152,7 @@ export const forgotPassword = async (req, res) => {
       [user.id, token, expires]
     );
 
-    const resetUrl = `http://localhost:5173/reset-password?token=${token}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
     await sendMail({
       to: user.email,
