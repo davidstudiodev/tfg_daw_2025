@@ -72,6 +72,8 @@ import { useRoute, useRouter } from 'vue-router'
 import AppLogo from '../components/AppLogo.vue'
 import { login, getMe } from '../services/auth.js'
 
+import { forgotPassword } from '../services/auth.js';
+
 const route = useRoute()
 const router = useRouter()
 
@@ -123,11 +125,8 @@ const resetMessage = ref('')
 async function sendResetEmail() {
   resetMessage.value = ''
   try {
-    await fetch('/api/auth/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: resetEmail.value })
-    })
+    await forgotPassword(resetEmail.value)
+    resetEmail.value = ''
     resetMessage.value = 'Si el email existe, se enviará un enlace de recuperación.'
   } catch (e) {
     resetMessage.value = 'No se pudo enviar el correo. Intenta de nuevo.'

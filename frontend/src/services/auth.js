@@ -16,3 +16,7 @@ export const getMe = () =>
 // Logout que elimina la cookie HttpOnly
 export const logout = () =>
   api.post('/api/auth/logout');
+
+// Recuperación de contraseña
+export const forgotPassword = (email) =>
+  api.post('/api/auth/forgot-password', { email });
