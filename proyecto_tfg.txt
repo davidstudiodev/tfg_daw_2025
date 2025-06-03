@@ -1,0 +1,21 @@
+Enlaces del proyecto:
+
+1. Enlace del repositorio de GitHub: https://github.com/davidstudiodev/tfg_daw_2025
+Aquí está la memoria del proyecto.
+
+2. Enlace de la aplicación desplegada: https://www.jobsxdevs.com/
+Frontend en Vercel: tfg-daw-2025.vercel.app
+Backend y base de datos en Railway: tfgdaw2025-production.up.railway.app
+
+3. Enlace del diseño en Figma:
+
+Proyecto:
+https://www.figma.com/design/hbXdLRL5ReWpUFslmXEkUP/TFG?m=auto&t=SMHOVBK09jCakI5u-1
+
+Prototipo:
+https://www.figma.com/proto/hbXdLRL5ReWpUFslmXEkUP/TFG?page-id=2%3A2&node-id=28-6677&p=f&viewport=275%2C213%2C0.08&t=gWXTtlyF7sYuopuj-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=2%3A3
+
+4. Acceso admin:
+
+Usuario: davidstudiosco@gmail.com
+Contraseña: David123
