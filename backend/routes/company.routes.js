@@ -39,7 +39,7 @@ router.post(
   createJobLimiter,
   authMiddleware,
   [
-    body('puesto').isString().isLength({ max: 20 }),
+    body('position').isString().isLength({ max: 20 }),
     body('sector').isString().notEmpty(),
     body('salary').isNumeric(),
     body('work_mode').isIn(['remoto', 'hibrido', 'local']),
@@ -51,7 +51,7 @@ router.post(
 )
 router.get('/jobs', authMiddleware, getCompanyJobs)
 router.put('/jobs/:id', authMiddleware, [
-  body('puesto').isString().isLength({ max: 20 }),
+  body('position').isString().isLength({ max: 20 }),
   body('sector').isString().notEmpty(),
   body('salary').isNumeric(),
   body('work_mode').isIn(['remoto', 'hibrido', 'local']),

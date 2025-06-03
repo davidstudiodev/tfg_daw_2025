@@ -39,8 +39,7 @@ CREATE TABLE IF NOT EXISTS developers (
 CREATE TABLE IF NOT EXISTS jobs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   company_id INT NOT NULL,
-  puesto VARCHAR(20) NOT NULL,
-  description TEXT NOT NULL,
+  position VARCHAR(20) NOT NULL,
   sector VARCHAR(100) NOT NULL,
   salary DECIMAL(10,2) NOT NULL,
   work_mode ENUM('remoto','hibrido','local') NOT NULL,

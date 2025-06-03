@@ -37,7 +37,7 @@
           <span class="company-name">{{ offer.company_name }}</span>
         </div>
 
-        <h1 class="offer-title">{{ offer.puesto }}</h1>
+        <h1 class="offer-title">{{ offer.position }}</h1>
         <div class="offer-details">
           <div class="detail-row">
             <span class="material-icons-outlined">location_on</span>
@@ -121,7 +121,7 @@ const fetchOffers = async () => {
   if (filters.value.salaryOrder) query += `&salaryOrder=${filters.value.salaryOrder}`;
   const { data } = await api.get(query);
   // Si alguna oferta viene con description, mapear a puesto
-  offers.value = data.offers.map(o => ({ ...o, puesto: o.puesto || o.description }));
+  offers.value = data.offers.map(o => ({ ...o, position: o.position || o.description }));
   pages.value = data.pages;
 };
 

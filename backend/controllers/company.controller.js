@@ -49,12 +49,12 @@ export const updateCompanyProfile = async (req, res) => {
 // Función para crear una oferta de trabajo
 export const createJob = async (req, res) => {
   const companyId = req.user.id;
-  const { puesto, sector, salary, work_mode, work_time, tech_stack } = req.body;
+  const { position, sector, salary, work_mode, work_time, tech_stack } = req.body;
   try {
     const [result] = await pool.query(
-      `INSERT INTO jobs (company_id, puesto, sector, salary, work_mode, work_time, tech_stack)
+      `INSERT INTO jobs (company_id, position, sector, salary, work_mode, work_time, tech_stack)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [companyId, puesto, sector, salary, work_mode, work_time, JSON.stringify(tech_stack)]
+      [companyId, position, sector, salary, work_mode, work_time, JSON.stringify(tech_stack)]
     );
 
     // Obtener email de la empresa
@@ -120,12 +120,12 @@ export const getCompanyJobs = async (req, res) => {
 export const updateJob = async (req, res) => {
   const companyId = req.user.id;
   const jobId = req.params.id;
-  const { puesto, sector, salary, work_mode, work_time, tech_stack } = req.body;
+  const { position, sector, salary, work_mode, work_time, tech_stack } = req.body;
   try {
     await pool.query(
-      `UPDATE jobs SET puesto=?, sector=?, salary=?, work_mode=?, work_time=?, tech_stack=?
+      `UPDATE jobs SET position=?, sector=?, salary=?, work_mode=?, work_time=?, tech_stack=?
        WHERE id=? AND company_id=?`,
-      [puesto, sector, salary, work_mode, work_time, JSON.stringify(tech_stack), jobId, companyId]
+      [position, sector, salary, work_mode, work_time, JSON.stringify(tech_stack), jobId, companyId]
     );
     res.json({ message: 'Job updated' });
   } catch (error) {
@@ -154,7 +154,7 @@ export const getCompanyApplications = async (req, res) => {
   const companyId = req.user.id;
   try {
     const [apps] = await pool.query(
-      `SELECT a.id as application_id, a.applied_at, j.id as offer_id, j.puesto, d.user_id as dev_id, u.name as dev_name, u.email as dev_email
+      `SELECT a.id as application_id, a.applied_at, j.id as offer_id, j.position, d.user_id as dev_id, u.name as dev_name, u.email as dev_email
        FROM applications a
        JOIN jobs j ON a.offer_id = j.id
        JOIN developers d ON a.dev_id = d.user_id

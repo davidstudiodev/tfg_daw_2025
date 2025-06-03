@@ -100,8 +100,8 @@
       <div class="form-row">
         <label>
           Puesto
-          <textarea v-model="job.puesto" :class="{ 'input-error': fieldErrors.puesto }" maxlength="20" required />
-          <span v-if="fieldErrors.puesto" class="input-error-message">{{ fieldErrors.puesto }}</span>
+          <textarea v-model="job.position" :class="{ 'input-error': fieldErrors.position }" maxlength="20" required />
+          <span v-if="fieldErrors.position" class="input-error-message">{{ fieldErrors.position }}</span>
         </label>
         <label>
           Sector
@@ -165,8 +165,8 @@
       <h2>Editar oferta</h2>
       <label>
         Puesto
-        <textarea v-model="jobEdit.puesto" :class="{ 'input-error': fieldErrors.puesto }" maxlength="20" required />
-        <span v-if="fieldErrors.puesto" class="input-error-message">{{ fieldErrors.puesto }}</span>
+        <textarea v-model="jobEdit.position" :class="{ 'input-error': fieldErrors.position }" maxlength="20" required />
+        <span v-if="fieldErrors.position" class="input-error-message">{{ fieldErrors.position }}</span>
       </label>
       <label>
         Sector
@@ -234,7 +234,7 @@
             </thead>
             <tbody>
               <tr v-for="job in jobs" :key="job.id">
-                <td>{{ job.puesto }}</td>
+                <td>{{ job.position }}</td>
                 <td>{{ job.sector }}</td>
                 <td>{{ job.salary }}</td>
                 <td>{{ job.work_mode }}</td>
@@ -274,7 +274,7 @@
           </thead>
           <tbody>
             <tr v-for="app in applications" :key="app.application_id">
-              <td>{{ app.puesto }}</td>
+              <td>{{ app.position }}</td>
               <td>{{ app.dev_name }}</td>
               <td>{{ app.dev_email }}</td>
               <td>{{ new Date(app.applied_at).toLocaleDateString() }}</td>
@@ -350,7 +350,7 @@
           <img v-if="form.avatar" :src="form.avatar" class="company-logo" alt="logo" />
           <span class="company-name">{{ form.name }}</span>
         </div>
-        <h1 class="offer-title">{{ job.puesto }}</h1>
+        <h1 class="offer-title">{{ job.position }}</h1>
         <div class="offer-details">
           <div class="detail-row">
             <span class="material-icons-outlined">business</span>
@@ -389,7 +389,7 @@
         <div class="company-info">
           <span class="company-name">{{ app.dev_name }}</span>
         </div>
-        <h1 class="offer-title">{{ app.puesto }}</h1>
+        <h1 class="offer-title">{{ app.position }}</h1>
         <div class="offer-details">
           <div class="detail-row">
             <span class="material-icons-outlined">email</span>
@@ -439,7 +439,7 @@ const form = ref({
 })
 
 const job = ref({
-  puesto: '',
+  position: '',
   sector: '',
   salary: '',
   work_mode: 'remoto',
@@ -542,7 +542,7 @@ async function saveProfile() {
 function startCreatingJob() {
   isCreatingJob.value = true
   job.value = {
-    puesto: '',
+    position: '',
     sector: '',
     salary: '',
     work_mode: 'remoto',
@@ -564,10 +564,10 @@ function toggleJobTech(item) {
 function validateJob() {
   fieldErrors.value = {};
   // Puesto: requerido, máximo 20 caracteres
-  if (!job.value.puesto || job.value.puesto.trim().length === 0) {
-    fieldErrors.value.puesto = 'El puesto es obligatorio.';
-  } else if (job.value.puesto.length > 20) {
-    fieldErrors.value.puesto = 'El puesto debe tener máximo 20 caracteres.';
+  if (!job.value.position || job.value.position.trim().length === 0) {
+    fieldErrors.value.position = 'El puesto es obligatorio.';
+  } else if (job.value.position.length > 20) {
+    fieldErrors.value.position = 'El puesto debe tener máximo 20 caracteres.';
   }
   if (!job.value.sector || job.value.sector.trim().length === 0) {
     fieldErrors.value.sector = 'El sector es obligatorio.';
@@ -627,7 +627,7 @@ const jobs = ref([])
 const loadJobs = async () => {
   try {
     const { data } = await getCompanyJobs()
-    jobs.value = data.map(j => ({ ...j, puesto: j.puesto || j.description }))
+    jobs.value = data.map(j => ({ ...j, position: j.position || j.description }))
   } catch {
     error.value = 'No se pudieron cargar las ofertas.'
   }
@@ -667,10 +667,10 @@ function toggleEditJobTech(item) {
 function validateEditJob() {
   fieldErrors.value = {};
   // Puesto: requerido, máximo 20 caracteres
-  if (!jobEdit.value.puesto || jobEdit.value.puesto.trim().length === 0) {
-    fieldErrors.value.puesto = 'El puesto es obligatorio.';
-  } else if (jobEdit.value.puesto.length > 20) {
-    fieldErrors.value.puesto = 'El puesto debe tener máximo 20 caracteres.';
+  if (!jobEdit.value.position || jobEdit.value.position.trim().length === 0) {
+    fieldErrors.value.position = 'El puesto es obligatorio.';
+  } else if (jobEdit.value.position.length > 20) {
+    fieldErrors.value.position = 'El puesto debe tener máximo 20 caracteres.';
   }
   if (!jobEdit.value.sector || jobEdit.value.sector.trim().length === 0) {
     fieldErrors.value.sector = 'El sector es obligatorio.';
@@ -715,7 +715,7 @@ async function loadApplications() {
   loadingApplications.value = true;
   try {
     const { data } = await api.get('/api/company/applications');
-    applications.value = data.map(app => ({ ...app, puesto: app.puesto || app.description }));
+    applications.value = data.map(app => ({ ...app, position: app.position || app.description }));
   } catch {
     applications.value = [];
   } finally {

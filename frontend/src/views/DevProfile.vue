@@ -275,7 +275,7 @@
           <tbody>
             <tr v-for="app in applications" :key="app.application_id">
               <td>{{ app.company_name }}</td>
-              <td>{{ app.puesto }}</td>
+              <td>{{ app.position }}</td>
               <td>{{ app.work_time }}</td>
               <td>{{ app.salary }}</td>
               <td>{{ new Date(app.applied_at).toLocaleDateString() }}</td>
