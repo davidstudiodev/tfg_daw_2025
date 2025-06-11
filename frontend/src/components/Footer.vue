@@ -110,7 +110,7 @@ async function handleSubmit() {
 
   loading.value = true
   try {
-    await axios.post('/api/contact', form.value)
+    await axios.post(`${import.meta.env.VITE_API_URL}/api/contact`, form.value)
     success.value = 'Gracias por escribirnos, nos pondremos en contacto pronto.'
     form.value = { name: '', email: '', message: '' }
   } catch (e) {
