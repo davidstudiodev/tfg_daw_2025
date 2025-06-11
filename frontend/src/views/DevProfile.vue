@@ -73,11 +73,18 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock</span>
               <input
-                type="password"
+                :type="showCurrentPassword ? 'text' : 'password'"
                 v-model="passwordForm.current"
                 :class="{ 'input-error': passwordErrors.current }"
                 placeholder="Contraseña actual"
               />
+              <span
+                class="material-icons-outlined eye"
+                @click="showCurrentPassword = !showCurrentPassword"
+                :title="showCurrentPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showCurrentPassword ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
             <span v-if="passwordErrors.current" class="input-error-message">{{ passwordErrors.current }}</span>
           </div>
@@ -86,12 +93,19 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock_reset</span>
               <input
-                type="password"
+                :type="showNewPassword ? 'text' : 'password'"
                 v-model="passwordForm.new"
                 :class="{ 'input-error': passwordErrors.new }"
                 @input="validatePasswordForm"
                 placeholder="Nueva contraseña"
               />
+              <span
+                class="material-icons-outlined eye"
+                @click="showNewPassword = !showNewPassword"
+                :title="showNewPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showNewPassword ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
             <span v-if="passwordErrors.new" class="input-error-message">
               {{ passwordErrors.new || 'Debe tener al menos 8 caracteres, una mayúscula y un número.' }}
@@ -102,12 +116,19 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock</span>
               <input
-                type="password"
+                :type="showRepeatPassword ? 'text' : 'password'"
                 v-model="passwordForm.repeat"
                 :class="{ 'input-error': passwordErrors.repeat }"
                 @input="validatePasswordForm"
                 placeholder="Repetir nueva contraseña"
               />
+              <span
+                class="material-icons-outlined eye"
+                @click="showRepeatPassword = !showRepeatPassword"
+                :title="showRepeatPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showRepeatPassword ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
             <span v-if="passwordErrors.repeat" class="input-error-message">{{ passwordErrors.repeat }}</span>
           </div>
@@ -125,6 +146,12 @@
     <form v-if="isEditing" @submit.prevent="saveProfile" class="profile-form">
       <h1>Edita tu perfil</h1>
 
+
+        <label>
+          Avatar
+          <input type="file" accept="image/*" @change="handleAvatarChange" />
+        </label>
+        <img v-if="form.avatar" :src="form.avatar" alt="Vista previa" class="avatar-preview" />
         <div class="form-row">
           <label>
             Nombre
@@ -504,6 +531,10 @@ const passwordErrors = ref({})
 const passwordChangeSuccess = ref('')
 const passwordChangeError = ref('')
 
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showRepeatPassword = ref(false)
+
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/
 
 function validatePasswordForm() {
@@ -697,7 +728,7 @@ onMounted(() => {
 
 .input-error {
   border: 1px solid var(--green-light) !important;
-  background: #fff6f6;
+  background: transparent !important;
   color: var(--green-light);
 }
 
@@ -917,8 +948,7 @@ onMounted(() => {
   min-width: 320px;
   max-width: 550px;
   width: 100%;
-  border: 1px solid var(--green-light);
-  box-shadow: 0 2px 12px #0002;
+  border: 1px solid var(--white);
 }
 
 input,
@@ -949,10 +979,14 @@ input[type="submit"] {
 }
 .modal-content input,
 .modal-content button {
+  background: transparent;
   min-height: 45px;
   height: 45px;
   font-size: 1rem;
   border-radius: 50px;
+  border : 1px solid var(--white);
+  margin-top: 0.3rem;
+  color: var(--white);
 }
 
 .modal-content .form-group {
@@ -984,7 +1018,7 @@ input[type="submit"] {
   font-size: 24px;
 }
 .modal-content input[type="password"] {
-  padding: 0.75rem 1rem 0.75rem 48px; // 48px a la izquierda para el icono
+  padding: 0.75rem 1rem 0.75rem 48px;
   font-size: 1rem;
   border-radius: 50px;
   border: 1px solid var(--white);
@@ -996,6 +1030,7 @@ input[type="submit"] {
   width: 100%;
 }
 .modal-content input[type="password"]:focus {
+  background: transparent;
   border: 1px solid var(--green-light);
 }
 .modal-content .save-btn {
@@ -1073,6 +1108,41 @@ input[type="submit"] {
   color: var(--green-light);
   border-color: var(--green-light);
   cursor: pointer;
+}
+
+.input-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon .material-icons-outlined {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--green-light);
+  font-size: 22px;
+  pointer-events: none;
+}
+
+.input-icon .eye {
+  right: 16px;
+  left: auto;
+  cursor: pointer;
+  color: var(--green-light);
+  z-index: 2;
+  position: absolute;
+  font-size: 22px;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.input-icon input {
+  padding-left: 48px;
+  padding-right: 44px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 

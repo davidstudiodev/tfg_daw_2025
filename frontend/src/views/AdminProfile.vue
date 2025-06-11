@@ -10,7 +10,7 @@
 
     <!-- Lista de Developers -->
     <div v-if="tab==='devs'">
-      <h2>Developers</h2>
+      <h2>Lista de Developers</h2>
       <div class="filters">
         <input v-model="devFilter" placeholder="Buscar por nombre o email..." />
         <button class="edit-btn" @click="showPasswordModal = true">
@@ -22,33 +22,41 @@
           Cambiar correo
         </button>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in filteredDevs" :key="user.id">
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <div class="table-actions">
-                <button @click="editUser(user)">Editar</button>
-                <button @click="deleteUser(user)">Eliminar</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in filteredDevs" :key="user.id">
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <div class="table-actions">
+                  <button @click="editUser(user)" title="Editar">
+                    <span class="material-icons-outlined">edit</span>
+                  </button>
+                  <button @click="deleteUser(user)" title="Eliminar">
+                    <span class="material-icons-outlined">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
 
 
     <!-- Lista de Empresas -->
     <div v-else>
-      <h2>Empresas</h2>
+      <h2>Lista de Empresas</h2>
       <div class="filters">
         <input v-model="devFilter" placeholder="Buscar por nombre o email..." />
         <button class="edit-btn" @click="showPasswordModal = true">
@@ -60,27 +68,36 @@
           Cambiar correo
         </button>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in filteredCompanies" :key="user.id">
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <div class="table-actions">
-                <button @click="editUser(user)">Editar</button>
-                <button @click="deleteUser(user)">Eliminar</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in filteredCompanies" :key="user.id">
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <div class="table-actions">
+                  <button @click="editUser(user)" title="Editar">
+                    <span class="material-icons-outlined">edit</span>
+                  </button>
+                  <button @click="deleteUser(user)" title="Eliminar">
+                    <span class="material-icons-outlined">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>      
+      </div>      
+
+
     </div>
 
 
@@ -134,11 +151,18 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock</span>
               <input
-                type="password"
+                :type="showCurrentPassword ? 'text' : 'password'"
                 v-model="passwordForm.current"
                 :class="{ 'input-error': passwordErrors.current }"
                 placeholder="Contraseña actual"
               />
+              <span
+                class="material-icons-outlined eye"
+                @click="showCurrentPassword = !showCurrentPassword"
+                :title="showCurrentPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showCurrentPassword ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
             <span v-if="passwordErrors.current" class="input-error-message">{{ passwordErrors.current }}</span>
           </div>
@@ -147,12 +171,19 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock_reset</span>
               <input
-                type="password"
+                :type="showNewPassword ? 'text' : 'password'"
                 v-model="passwordForm.new"
                 :class="{ 'input-error': passwordErrors.new }"
                 @input="validatePasswordForm"
                 placeholder="Nueva contraseña"
               />
+              <span
+                class="material-icons-outlined eye"
+                @click="showNewPassword = !showNewPassword"
+                :title="showNewPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showNewPassword ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
             <span v-if="passwordErrors.new" class="input-error-message">
               {{ passwordErrors.new || 'Debe tener al menos 8 caracteres, una mayúscula y un número.' }}
@@ -163,12 +194,19 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock</span>
               <input
-                type="password"
+                :type="showRepeatPassword ? 'text' : 'password'"
                 v-model="passwordForm.repeat"
                 :class="{ 'input-error': passwordErrors.repeat }"
                 @input="validatePasswordForm"
                 placeholder="Repetir nueva contraseña"
               />
+              <span
+                class="material-icons-outlined eye"
+                @click="showRepeatPassword = !showRepeatPassword"
+                :title="showRepeatPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showRepeatPassword ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
             <span v-if="passwordErrors.repeat" class="input-error-message">{{ passwordErrors.repeat }}</span>
           </div>
@@ -192,7 +230,24 @@
           <label>Nuevo correo</label>
           <input v-model="emailForm.email" type="email" required />
           <label>Contraseña actual</label>
-          <input v-model="emailForm.currentPassword" type="password" required placeholder="Contraseña actual" />
+
+          <div class="input-icon">
+            <span class="material-icons-outlined">lock</span>
+            <input
+              v-model="emailForm.currentPassword"
+              :type="showEmailPassword ? 'text' : 'password'"
+              required
+              placeholder="Contraseña actual"
+            />
+            <span
+              class="material-icons-outlined eye"
+              @click="showEmailPassword = !showEmailPassword"
+              :title="showEmailPassword ? 'Ocultar' : 'Mostrar'"
+            >
+              {{ showEmailPassword ? 'visibility_off' : 'visibility' }}
+            </span>
+          </div>
+
           <div class="modal-actions">
             <button type="submit" class="save-btn">Guardar</button>
             <button type="button" @click="closeEmailModal" class="cancel-btn">Cancelar</button>
@@ -392,6 +447,11 @@ const emailError = ref('')
 const emailSuccess = ref('')
 const adminEmail = ref('')
 
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showRepeatPassword = ref(false)
+const showEmailPassword = ref(false)
+
 function openEmailModal() {
   emailForm.value.email = adminEmail.value
   emailForm.value.currentPassword = ''
@@ -441,13 +501,11 @@ onMounted(async () => {
 <style lang="scss" scoped>
 
 .admin-profile {
-  max-width: 1100px;
-  margin: 2rem auto;
+  max-width: auto;
+  width: 100%;
   padding: 2.5rem 2rem;
-  background: var(--black);
-  border-radius: 18px;
-  box-shadow: 0 2px 12px #0002;
-  color: var(--white);
+  background: var(--white);
+  color: var(--black);
   position: relative;
 }
 .tabs {
@@ -457,8 +515,8 @@ onMounted(async () => {
 }
 .tabs button {
   background: transparent;
-  color: var(--green-light);
-  border: 1px solid var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--black);
   border-radius: 50px;
   padding: 0.6rem 1.5rem;
   font-size: 1rem;
@@ -473,37 +531,40 @@ onMounted(async () => {
 }
 
 h1 {
-  color: var(--green-light);
+  color: var(--black);
   font-size: 2.2rem;
   margin-bottom: 2rem;
   font-weight: 600;
 }
 h2 {
-  color: var(--green-light);
+  color: var(--black);
   font-size: 1.3rem;
   margin-bottom: 1rem;
 }
 
-
+.table-responsive {
+  width: auto;
+  overflow-x: auto;
+}
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
-  background: var(--black);
-  color: var(--white);
+  background: transparent;
+  color: var(--black);
   border-radius: 12px;
   overflow: hidden;
 }
 th, td {
   padding: 0.8rem 1rem;
   text-align: center;
-  border-bottom: 1px solid var(--green-light);
+  border-bottom: 1px solid var(--black);
   vertical-align: middle;
 }
 
 th {
-  background: var(--green-light);
-  color: var(--black);
+  background: var(--black);
+  color: var(--white);
   font-weight: 600;
   font-size: 1rem;
 }
@@ -513,9 +574,29 @@ tr:last-child td {
 
 .table-actions {
   display: flex;
-  gap: 0.5rem;
   justify-content: center;
   align-items: center;
+}
+
+.table-actions button {
+  background: transparent;
+  border: none;
+  color: var(--black);
+  padding: 0.3rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+}
+.table-actions button:hover {
+  background: transparent;
+  color: var(--green-light);
+}
+.table-actions .material-icons-outlined {
+  font-size: 1.5rem;
 }
 
 .modal-overlay {
@@ -528,14 +609,14 @@ tr:last-child td {
   z-index: 1000;
 }
 .modal {
-  background: var(--black);
-  color: var(--white);
+  background: var(--white);
+  color: var(--black);
   padding: 2rem;
   border-radius: 20px;
   min-width: 320px;
-  max-width: 500px;
+  max-width: 700px;
   width: 100%;
-  border: 1px solid var(--green-light);
+  border: 1px solid var(--black);
 }
 .modal-actions {
   margin-top: 1rem;
@@ -547,9 +628,9 @@ tr:last-child td {
 .modal textarea {
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1px solid var(--white);
+  border: 1px solid var(--black);
   background: transparent;
-  color: var(--white);
+  color: var(--black);
   font-size: 1rem;
   outline: none;
   transition: border 0.2s;
@@ -565,7 +646,7 @@ tr:last-child td {
   display: block;
   margin-bottom: 0.4rem;
   font-weight: 500;
-  color: var(--white);
+  color: var(--black);
 }
 
 button,
@@ -575,8 +656,8 @@ input[type="submit"] {
   justify-content: center;
   gap: 0.5rem;
   background: transparent;
-  color: var(--green-light);
-  border: 1px solid var(--green-light);
+  color: var(--black);
+  border: 1px solid var(--black);
   border-radius: 50px;
   padding: 0.6rem 1.5rem;
   font-size: 1rem;
@@ -595,7 +676,7 @@ input[type="submit"]:hover {
   right: 32px;
   background: var(--green-light);
   color: var(--black);
-  border: 1px solid var(--green-light);
+  border: 1px solid var(--black);
   border-radius: 50px;
   padding: 0.7rem 2.2rem;
   font-size: 1rem;
@@ -604,9 +685,9 @@ input[type="submit"]:hover {
   width: auto;
 }
 .logout-btn:hover {
-  background: transparent;
-  color: var(--green-light);
-  border-color: var(--green-light);
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
 }
 
 .filters {
@@ -623,9 +704,9 @@ input[type="submit"]:hover {
 .filters input {
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1px solid var(--white);
+  border: 1px solid var(--black);
   background: transparent;
-  color: var(--white);
+  color: var(--black);
   font-size: 1rem;
   outline: none;
   transition: border 0.2s;
@@ -636,32 +717,52 @@ input[type="submit"]:hover {
   position: relative;
   display: flex;
   align-items: center;
+  margin-bottom: 1rem;
 }
 
 .input-icon .material-icons-outlined {
   position: absolute;
   left: 16px;
-  top: 35%;
-  transform: translateY(-50%);
-  color: var(--green-light);
+  top: 13px;
+  color: var(--black);
   font-size: 22px;
   pointer-events: none;
 }
 
-.input-icon input {
-  padding-left: 44px;
-  width: 100%;
+.input-icon .eye {
+  right: 16px;
+  left: auto;
+  cursor: pointer;
+  color: var(--black);
+  z-index: 2;
+  position: absolute;
+  font-size: 22px;
+  pointer-events: auto;
+  user-select: none;
 }
 
+.input-icon input {
+  padding-left: 44px;
+  padding-right: 44px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input-error-message {
+  color: #e74c3c;
+  font-size: 0.97rem;
+  margin-top: -1.5rem;
+  margin-bottom: 0.2rem;
+  display: block;
+}
 
 // Responsive styles
 
 @media (max-width: 900px) {
   .admin-profile {
-    padding: 1.5rem 0.5rem;
-    border-radius: 12px;
+    padding: 2.5rem 2.5rem;
     min-width: 0;
-    margin: 20px;
+    margin: 0;
   }
   .logout-btn {
     top: 18px;
@@ -715,7 +816,7 @@ input[type="submit"]:hover {
   }
 
   .table-actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.3rem;
     align-items: stretch;
     justify-content: center;
@@ -726,7 +827,7 @@ input[type="submit"]:hover {
     padding: 1rem;
   }
   .modal-actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.5rem;
     align-items: stretch;
   }
@@ -739,14 +840,18 @@ input[type="submit"]:hover {
     padding-left: 44px;
     width: 100%;
   }
-  
-}
 
+  .input-icon .material-icons-outlined {
+    top: 8px;
+  }
+    
+}
 
 @media (max-width: 600px) {
   .admin-profile {
-    padding: 0.5rem 0.1rem;
+    padding: 2rem 1rem;
     border-radius: 0;
+    margin: 0;
   }
   .logout-btn {
     top: 8px;

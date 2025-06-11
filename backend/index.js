@@ -11,6 +11,7 @@ import protectedRoutes from './routes/protected.routes.js';
 import devRoutes from './routes/dev.routes.js'
 import companyRoutes from './routes/company.routes.js'
 import offersRoutes from './routes/offers.routes.js';
+import contactRoutes from './routes/contact.routes.js'
 
 // Import DB connection
 import db from './config/db.js';
@@ -42,6 +43,7 @@ app.use('/api/protected', protectedRoutes);
 app.use('/api/dev', devRoutes)
 app.use('/api/company', companyRoutes)
 app.use('/api/offers', offersRoutes)
+app.use('/api/contact', contactRoutes)
 
 app.use('/api/admin', adminRoutes)
 

@@ -22,10 +22,17 @@
           <span class="material-icons-outlined">lock</span>
           <input
             v-model="form.password"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             placeholder="*********"
             required
           />
+          <span
+            class="material-icons-outlined eye"
+            @click="showPassword = !showPassword"
+            :title="showPassword ? 'Ocultar' : 'Mostrar'"
+          >
+            {{ showPassword ? 'visibility_off' : 'visibility' }}
+          </span>
         </div>
         <!-- Modal para recuperar contraseña -->
         <a v-if="!showForgotPassword" href="#" @click.prevent="showForgotPassword = true">¿Has olvidado tu contraseña?</a>
@@ -86,6 +93,7 @@ const roleLabel = computed(() =>
 const form = ref({ email: '', password: '' })
 const loading = ref(false)
 const error = ref('')
+const showPassword = ref(false)
 
 const submitForm = async () => {
   loading.value = true
@@ -228,9 +236,23 @@ async function sendResetEmail() {
   pointer-events: none;
 }
 
+.input-icon .eye {
+  right: 16px;
+  left: auto;
+  cursor: pointer;
+  color: var(--green-light);
+  z-index: 2;
+  position: absolute;
+  font-size: 22px;
+  pointer-events: auto;
+  user-select: none;
+}
+
 .input-icon input {
   padding-left: 44px;
+  padding-right: 44px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .forgot-password-modal {

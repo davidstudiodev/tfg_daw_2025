@@ -294,11 +294,18 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock</span>
               <input
-                type="password"
+                :type="showCurrentPassword ? 'text' : 'password'"
                 v-model="passwordForm.current"
                 :class="{ 'input-error': passwordErrors.current }"
                 placeholder="Contraseña actual"
               />
+              <span
+                class="material-icons-outlined eye"
+                @click="showCurrentPassword = !showCurrentPassword"
+                :title="showCurrentPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showCurrentPassword ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
             <span v-if="passwordErrors.current" class="input-error-message">{{ passwordErrors.current }}</span>
           </div>
@@ -307,13 +314,20 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock_reset</span>
               <input
-                type="password"
+                :type="showNewPassword ? 'text' : 'password'"
                 v-model="passwordForm.new"
                 :class="{ 'input-error': passwordErrors.new }"
                 @input="validatePasswordForm"
                 placeholder="Nueva contraseña"
               />
-            </div>
+              <span
+                class="material-icons-outlined eye"
+                @click="showNewPassword = !showNewPassword"
+                :title="showNewPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showNewPassword ? 'visibility_off' : 'visibility' }}
+              </span>
+            </div>  
             <span v-if="passwordErrors.new" class="input-error-message">
               {{ passwordErrors.new || 'Debe tener al menos 8 caracteres, una mayúscula y un número.' }}
             </span>
@@ -323,12 +337,19 @@
             <div class="input-icon">
               <span class="material-icons-outlined">lock</span>
               <input
-                type="password"
+                :type="showRepeatPassword ? 'text' : 'password'"
                 v-model="passwordForm.repeat"
                 :class="{ 'input-error': passwordErrors.repeat }"
                 @input="validatePasswordForm"
                 placeholder="Repetir nueva contraseña"
               />
+              <span
+                class="material-icons-outlined eye"
+                @click="showRepeatPassword = !showRepeatPassword"
+                :title="showRepeatPassword ? 'Ocultar' : 'Mostrar'"
+              >
+                {{ showRepeatPassword ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
             <span v-if="passwordErrors.repeat" class="input-error-message">{{ passwordErrors.repeat }}</span>
           </div>
@@ -742,6 +763,12 @@ function validatePasswordForm() {
     passwordErrors.value.repeat = 'Las contraseñas no coinciden.'
   return Object.keys(passwordErrors.value).length === 0
 }
+
+// Función para cambiar la contraseña
+
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showRepeatPassword = ref(false)
 
 async function changePassword() {
   passwordChangeSuccess.value = ''
@@ -1232,11 +1259,12 @@ label {
   background: var(--black);
   color: var(--white);
   padding: 2rem;
+  margin: 3rem;
   border-radius: 20px;
   min-width: 320px;
-  max-width: 550px;
+  max-width: 500px;
   width: 100%;
-  border: 1px solid var(--green-light);
+  border: 1px solid var(--white);
   box-shadow: 0 2px 12px #0002;
 }
 .modal-content h3 {
@@ -1263,6 +1291,24 @@ label {
   color: var(--green-light);
   font-size: 22px;
   pointer-events: none;
+}
+.input-icon .eye {
+  right: 16px;
+  left: auto;
+  cursor: pointer;
+  color: var(--green-light);
+  z-index: 2;
+  position: absolute;
+  font-size: 22px;
+  pointer-events: auto;
+  user-select: none;
+}
+.input-icon input {
+  padding-left: 48px;
+  padding-right: 44px;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 50px;
 }
 .modal-content input[type="password"] {
   padding: 0.75rem 1rem 0.75rem 48px; // espacio para el icono

@@ -2,7 +2,10 @@
 
   <!-- Contenedor de ofertas -->
   <div class="offers-container">
-    <AppLogo />
+
+    <div style="width:100%; text-align:left;">
+      <AppLogo @click="$router.push('/')" style="cursor:pointer" color="white" />
+    </div>
     <div class="offers-header" v-if="!isLoggedIn">
       <router-link to="/login?role=dev" class="auth-btn">Login</router-link>
       <router-link to="/register?role=dev" class="auth-btn">Register</router-link>
@@ -13,7 +16,7 @@
     <div class="offers-header" v-else-if="isLoggedIn">
       <button class="auth-btn" @click="goToCompanyProfile">Volver a mi perfil</button>
     </div>
-    <h1>Ofertas publicadas</h1>
+    <h1>Las mejores empresas en un solo lugar</h1>
     <div class="filters">
       <input v-model="filters.location" placeholder="Ubicación" @input="fetchOffers" />
       <select v-model="filters.work_time" @change="fetchOffers">
@@ -37,7 +40,7 @@
           <span class="company-name">{{ offer.company_name }}</span>
         </div>
 
-        <h1 class="offer-title">{{ offer.position }}</h1>
+        <h2 class="offer-title">{{ offer.position }}</h2>
         <div class="offer-details">
           <div class="detail-row">
             <span class="material-icons-outlined">location_on</span>
@@ -191,16 +194,19 @@ onMounted(() => {
 
 .offers-container {
   position: relative;
-  max-width: 1100px;
-  margin: 2rem auto;
+  width: 100vw;
+  height: auto;
+  max-width: auto;
   padding: 2rem 1rem;
   background: var(--black);
-  border-radius: 18px;
-  box-shadow: 0 2px 12px #0002;
   color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 h1 {
-  color: var(--green-light);
+  color: var(--white);
   font-size: 2.2rem;
   margin-bottom: 2rem;
   font-weight: 600;
@@ -222,7 +228,28 @@ h1 {
   justify-content: center;
 }
 
-.auth-btn,
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--green-light);
+  border: 1px solid var(--green-light);
+  border-radius: 50px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-decoration: none;
+}
+.auth-btn:hover {
+  background: var(--green-light);
+  color: var(--black);
+  border-color: var(--green-light);
+}
+
 .apply-btn {
   display: flex;
   align-items: center;
@@ -239,12 +266,10 @@ h1 {
   transition: background 0.2s, color 0.2s;
   text-decoration: none;
 }
-
-.auth-btn:hover,
 .apply-btn:hover {
-  background: transparent;
-  color: var(--green-light);
-  border-color: var(--green-light);
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
 }
 
 .apply-btn[disabled], .apply-btn:disabled {
@@ -255,12 +280,12 @@ h1 {
 }
 
 .filters {
-  width: 100%;
+  width: 80%;
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
   align-items: center;
-  justify-content: space-around;
+  justify-content: flex-start;
 }
 
 .filters input,
@@ -286,21 +311,21 @@ h1 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+  width: 80%;
 }
 
 .offer-card {
-  border: 1px solid var(--green-light);
   border-radius: 18px;
   padding: 1.5rem;
-  background: var(--black);
-  color: var(--white);
+  background: var(--white);
+  color: var(--black);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   position: relative;
   gap: 0.7rem;
-  box-shadow: 0 2px 8px #0002;
-  min-height: 420px;
+  min-height: 400px;
+  width: auto;
 }
 
 .card-actions {
@@ -328,19 +353,18 @@ h1 {
   object-fit: cover;
   border-radius: 50%;
   border: 1px solid var(--green-light);
-  background: var(--smoke);
+  background: var(--white);
 }
 
 .company-name {
-  font-weight: bold;
-  color: var(--green-light);
-  font-size: 1.1rem;
+  color: var(--black);
+  font-size: 1rem;
 }
 
 .offer-title {
   width: 80%;
   font-size: 32px;
-  color: var(--white);
+  color: var(--black);
   font-weight: 600;
   margin: 0.5rem 0 1rem 0;
   line-height: 1;
@@ -358,12 +382,12 @@ h1 {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  color: var(--white);
+  color: var(--black);
   font-size: 15px;
 }
 
 .detail-row .material-icons-outlined {
-  color: var(--green-light);
+  color: var(--black);
   font-size: 20px;
 }
 
@@ -381,8 +405,7 @@ h1 {
   color: var(--black);
   border: 1px solid var(--green-light);
   border-radius: 50px;
-  padding: 0.6rem 1.5rem;
-  width: 40px;
+  width: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -407,23 +430,31 @@ h1 {
 
 @media (max-width: 900px) {
   .offers-container {
-    margin: 50px;
-    padding: 1rem 0.2rem;
-    border-radius: 10px;
+    padding: 1.5rem 0.5rem;
+    width: 100vw;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+    line-height: 1;
+    width: 80%;
   }
 
   .offers-header {
-    position: static;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: end;
-    gap: 0.7rem;
-    margin-bottom: 1rem;
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    display: flex;
+    gap: 1rem;
+    z-index: 100;
   }
 
   .offers-header .auth-btn {
     min-width: 120px;
-    width: auto;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
   }
 
   .filters {
@@ -432,14 +463,15 @@ h1 {
     align-items: stretch;
     justify-content: flex-start;
     margin-bottom: 1.5rem;
+    width: 80%;
   }
   .offers-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
   }
   .offer-card {
-    min-height: 340px;
-    padding: 1rem;
+    min-height: 320px;
+    padding: 1.5rem;
     border-radius: 12px;
   }
   .offer-title {
@@ -451,7 +483,12 @@ h1 {
     height: 32px;
   }
   .card-actions {
-    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+    margin-right: 0.2rem;
+    margin-bottom: 0.2rem;
+    width: 100%;
   }
   .pagination {
     margin-top: 1.2rem;
@@ -470,6 +507,15 @@ h1 {
     gap: 0.5rem;
     margin-bottom: 1rem;
   }
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+    line-height: 1;
+    width: 80%;
+  }
+
   .filters {
     flex-direction: column;
     gap: 0.5rem;
@@ -478,15 +524,15 @@ h1 {
   }
   .offers-grid {
     grid-template-columns: 1fr;
-    gap: 0.7rem;
+    gap: 1.5rem;
   }
   .offer-card {
     min-height: 0;
-    padding: 0.8rem;
-    border-radius: 10px;
+    padding: 1.5rem;
+    border-radius: 15px;
   }
   .offer-title {
-    font-size: 1rem;
+    font-size: 1.5rem;
     width: 100%;
   }
   .company-logo {

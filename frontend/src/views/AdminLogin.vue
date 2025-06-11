@@ -10,7 +10,19 @@
         </div>
         <div class="input-icon">
           <span class="material-icons-outlined">lock</span>
-          <input v-model="password" type="password" placeholder="Contraseña" required />
+          <input
+            v-model="password"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="Contraseña"
+            required
+          />
+          <span
+            class="material-icons-outlined eye"
+            @click="showPassword = !showPassword"
+            :title="showPassword ? 'Ocultar' : 'Mostrar'"
+          >
+            {{ showPassword ? 'visibility_off' : 'visibility' }}
+          </span>
         </div>
         <a
           href="#"
@@ -73,6 +85,8 @@ const password = ref('')
 const error = ref('')
 const loading = ref(false)
 const router = useRouter()
+
+const showPassword = ref(false)
 
 async function submit() {
   error.value = ''
@@ -180,9 +194,22 @@ async function submit() {
   pointer-events: none;
 }
 
+.input-icon .eye {
+  right: 16px;
+  left: auto;
+  cursor: pointer;
+  color: var(--green-light);
+  z-index: 2;
+  position: absolute;
+  font-size: 22px;
+  pointer-events: auto;
+  user-select: none;
+}
 .input-icon input {
   padding-left: 44px;
+  padding-right: 44px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 

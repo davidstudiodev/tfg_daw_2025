@@ -1,7 +1,9 @@
 <template>
   <div class="developers-list">
 
-    <AppLogo @click="$router.push('/')" style="cursor:pointer" />
+    <div style="width:100%; text-align:left;">
+      <AppLogo @click="$router.push('/')" style="cursor:pointer" color="black" />
+    </div>
 
     <div class="developers-header" v-if="!isLoggedIn">
         <router-link to="/login?role=dev" class="auth-btn">Login</router-link>
@@ -11,7 +13,7 @@
         <button class="auth-btn" @click="goToProfile">Ir a perfil</button>
     </div>
 
-    <h1>Desarrolladores</h1>
+    <h1>Conecta con los dev’s que destacan</h1>
 
     <div class="filters">
         <input v-model="filterName" placeholder="Buscar por nombre..." />
@@ -235,13 +237,16 @@ onMounted(async () => {
 
 .developers-list {
   position: relative;
-  max-width: 1100px;
-  margin: 2rem auto;
+  width: 100vw;
+  height: auto;
+  max-width: auto;
   padding: 2rem 1rem;
-  background: var(--black);
-  border-radius: 18px;
-  box-shadow: 0 2px 12px #0002;
-  color: var(--white);
+  background: var(--white);
+  color: var(--black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .developers-header {
@@ -271,20 +276,21 @@ onMounted(async () => {
   transition: background 0.2s, color 0.2s;
 }
 .auth-btn:hover {
-  background: transparent;
-  color: var(--green-light);
-  border-color: var(--green-light);
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
 }
 
 h1 {
-  color: var(--green-light);
+  color: var(--black);
   font-size: 2.2rem;
   margin-bottom: 2rem;
   font-weight: 600;
+  text-align: center;
 }
 
 .filters {
-  width: 100%;
+  width: 80%;
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
@@ -296,9 +302,9 @@ h1 {
 .filters select {
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1px solid var(--white);
+  border: 1px solid var(--black);
   background: transparent;
-  color: var(--white);
+  color: var(--black);
   font-size: 1rem;
   outline: none;
   transition: border 0.2s;
@@ -314,10 +320,10 @@ h1 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+  width: 80%;
 }
 
 .dev-card {
-  border: 1px solid var(--green-light);
   border-radius: 18px;
   padding: 1.5rem;
   background: var(--black);
@@ -325,7 +331,6 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  box-shadow: 0 2px 8px #0002;
   min-height: 400px;
 }
 
@@ -338,7 +343,7 @@ h1 {
 
 .dev-name {
   font-size: 2rem;
-  color: var(--green-light);
+  color: var(--white);
   font-weight: 600;
   line-height: 1;
 }
@@ -346,10 +351,10 @@ h1 {
 .avatar {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  border-radius: 20%;
   object-fit: cover;
-  border: 1px solid var(--green-light);
-  background: var(--smoke);
+  border: 1px solid var(--white);
+  background: var(--white);
   margin-bottom: 0.5rem;
 }
 
@@ -388,9 +393,16 @@ h1 {
   margin-bottom: 0.2rem;
 }
 
+.dev-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .apply-btn {
-  min-width: 130px;
-  width: auto;
+  min-width: 100px;
+  width: 100%;
   padding: 0.6rem 1.5rem;
   display: flex;
   align-items: center;
@@ -428,9 +440,9 @@ h1 {
   border-radius: 20px;
   min-width: 320px;
   max-width: 500px;
-  height: 400px;
+  height: 450px;
   width: 100%;
-  border: 1px solid var(--green-light);
+  border: 1px solid var(--white);
   box-shadow: 0 2px 12px #0002;
   position: relative;
   display: flex;
@@ -458,7 +470,7 @@ h1 {
 }
 
 .detail-row .material-icons-outlined {
-  color: var(--green-light);
+  color: var(--white);
   font-size: 20px;
   min-width: 22px;
   margin-top: 1px;
@@ -478,8 +490,7 @@ h1 {
   color: var(--black);
   border: 1px solid var(--green-light);
   border-radius: 50px;
-  padding: 0.6rem 1.5rem;
-  width: 40px;
+  width: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -504,18 +515,17 @@ h1 {
 
 @media (max-width: 900px) {
   .developers-list {
-    margin: 50px;
     padding: 1.5rem 0.5rem;
-    border-radius: 12px;
+    width: 100vw;
+    
   }
   .developers-header {
-    position: static;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.7rem;
-    margin-bottom: 1rem;
-    top: unset;
-    right: unset;
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    display: flex;
+    gap: 1rem;
+    z-index: 100;
   }
   .auth-btn {
     min-width: 120px;
@@ -529,18 +539,19 @@ h1 {
     margin-bottom: 1.5rem;
   }
   .filters {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.7rem;
     align-items: stretch;
     margin-bottom: 1.5rem;
+    width: 80%;
   }
   .dev-cards {
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
   }
   .dev-card {
     min-height: 320px;
-    padding: 1rem;
+    padding: 1.5rem;
     border-radius: 12px;
   }
   .dev-header {
@@ -550,8 +561,8 @@ h1 {
     font-size: 1.2rem;
   }
   .avatar {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
   }
   .card-actions {
     display: flex;
@@ -559,7 +570,16 @@ h1 {
     margin-top: auto;
     margin-right: 0.2rem;
     margin-bottom: 0.2rem;
+    width: 100%;
   }
+  .card-actions .apply-btn {
+    min-width: 100%;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+  }
+
+
   .pagination {
     margin-top: 1.2rem;
     gap: 0.5rem;
@@ -586,9 +606,11 @@ h1 {
   
   h1 {
     text-align: center;
-    font-size: 2.2rem;
-    margin-top: 2rem;
+    font-size: 1.8rem;
+    margin-top: 3rem;
     margin-bottom: 1rem;
+    line-height: 1;
+    width: 80%;
   }
   .filters {
     flex-direction: column;
@@ -598,18 +620,18 @@ h1 {
   }
   .dev-cards {
     grid-template-columns: 1fr;
-    gap: 0.7rem;
+    gap: 1rem;
   }
   .dev-card {
     min-height: 0;
-    padding: 0.8rem;
-    border-radius: 10px;
+    padding: 1.5rem;
+    border-radius: 15px;
   }
   .dev-header {
     gap: 0.5rem;
   }
   .dev-name {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
   }
   .avatar {
     width: 38px;

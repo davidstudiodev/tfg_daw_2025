@@ -5,7 +5,7 @@
 
       <!-- Botones de autenticación -->
       <div class="auth-buttons" v-if="!isLoggedIn">
-        <button @click="goTo('register')">REGISTER</button>
+        <button @click="goTo('register')">REGISTRO</button>
         <button @click="goTo('login')">LOGIN</button>
       </div>
 
@@ -30,16 +30,26 @@
       </div>
 
       <!-- Sección de empresa -->
-      <div v-if="isCompany" class="company-section">
-
-        <div class="company_mockups">
-          <img :src="companyIphone" alt="iPhone Mockup" />
+      <div v-if="isCompany">
+        <div class="company-section">
+          <div class="company_mockups">
+            <img :src="companyIphone" alt="iPhone Mockup" />
+          </div>
+          <div class="company_text">
+            <h2>Encuentra devs <br>que encajan en tu stack</h2>
+            <p>Desarrolladores con las skills que tu equipo necesita. <br class="hide-on-mobile">Sin rodeos.</p>
+          </div>
         </div>
-
-        <div class="company_text">
-          <h2>Encuentra devs <br>que encajan en tu stack</h2>
-          <p>Desarrolladores con las skills que tu equipo necesita. <br class="hide-on-mobile">Sin rodeos.</p>
+        <div class="company-whyus-wrapper">
+          <CompanyWhyUs />
         </div>
+        <div class="company-stats-wrapper">
+          <CompanyStats />
+        </div>
+        <div class="top-developers-wrapper">
+          <TopDevelopers />
+        </div>
+        <Footer />
 
       </div>
       
@@ -52,6 +62,17 @@
           <img :src="devsMacbook" alt="Hero Image" />
           <img :src="devsIphone" alt="Hero Image" />
         </div>
+        
+        <div class="skills-showcase-wrapper">
+          <SkillsShowcase />
+        </div>
+        <div class="top-companies-wrapper">
+          <TopCompanies />
+        </div>
+        <div class="top-tech-wrapper">
+          <TopTech />
+        </div>
+        <Footer />
         
       </div>
 
@@ -68,6 +89,14 @@ import { logout, getMe } from '../services/auth.js';
 import devsMacbook from '../assets/devs_macbook.svg';
 import devsIphone from '../assets/devs_iphone.svg';
 import companyIphone from '../assets/company_iphone.svg';
+
+import SkillsShowcase from '/src/components/SkillsShowcase.vue'
+import TopCompanies from '/src/components/TopCompanies.vue';
+import TopTech from '/src/components/TopTech.vue';
+import Footer from '/src/components/Footer.vue';
+import CompanyWhyUs from '../components/CompanyWhyUs.vue';
+import CompanyStats from '../components/CompanyStats.vue';
+import TopDevelopers from '../components/TopDevelopers.vue';
 
 const isCompany = ref(false);
 const router = useRouter();
@@ -120,10 +149,11 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+
 .app {
   font-family: sans-serif;
   min-height: 100vh;
-  height: 100vh;
+  height: auto;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -156,6 +186,26 @@ onMounted(() => {
     }
   }
 
+
+.skills-showcase-wrapper {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    padding: 0;
+}
+
+.top-tech-wrapper {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 0;
+}
 
 .form-section {
   display: flex;
@@ -193,6 +243,7 @@ onMounted(() => {
     img {
       width: 100%;
       max-width: 400px;
+      z-index: 3;
     }
   }
   .company_text {
@@ -215,13 +266,14 @@ onMounted(() => {
   flex-direction: row;
   justify-content: center;
   align-items: flex-start;
-  margin-top: -40px;
+  margin-top: -70px;
   position: relative;
-  height: 220px;
 }
+
 .devs_mockups img:first-child {
-  max-width: 90vw;
   z-index: 1;
+  position: relative;
+  top: 18px;
 }
 
 .devs_mockups img:last-child {
@@ -304,6 +356,26 @@ onMounted(() => {
   transform: translateX(0);
 }
 
+.company-whyus-wrapper {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: -220px;
+  z-index: 2;
+}
+
+.top-developers-wrapper {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 0;
+}
 
 //Responsive styles
 
@@ -314,6 +386,7 @@ onMounted(() => {
     height: auto;
     margin-top: 0;
   }
+  
   .devs_mockups img:first-child {
     display: none; // Oculta Macbook
   }
@@ -332,6 +405,16 @@ onMounted(() => {
     text-align: center;
     font-size: 16px;
     
+  }
+  .company-whyus-wrapper {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-top: -250px;
+    z-index: 2;
   }
 }
 
@@ -364,6 +447,7 @@ onMounted(() => {
         max-width: 80vw;
         margin: 0 auto;
         display: block;
+        margin-top: -70px; 
       }
     }
     .company_text {

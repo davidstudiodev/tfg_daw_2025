@@ -35,12 +35,20 @@
           <span class="material-icons-outlined">lock</span>
           <input
             v-model="form.password"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             placeholder="*********"
             required
             @blur="passwordError = ''"
             @keydown.esc="passwordError = ''"
+            :class="{ 'input-error': passwordError }"
           />
+          <span
+            class="material-icons-outlined eye"
+            @click="showPassword = !showPassword"
+            :title="showPassword ? 'Ocultar' : 'Mostrar'"
+          >
+            {{ showPassword ? 'visibility_off' : 'visibility' }}
+          </span>
         </div>
         <small class="info">Debe tener al menos 8 caracteres, una mayúscula y un número.</small>
 
@@ -86,6 +94,7 @@ const form = ref({ name: '', email: '', password: '' })
 const loading = ref(false)
 const error = ref('')
 const passwordError = ref('')
+const showPassword = ref(false)
 
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/
 
@@ -227,9 +236,23 @@ const submitForm = async () => {
   pointer-events: none;
 }
 
+.input-icon .eye {
+  right: 16px;
+  left: auto;
+  cursor: pointer;
+  color: var(--green-light);
+  z-index: 2;
+  position: absolute;
+  font-size: 22px;
+  pointer-events: auto;
+  user-select: none;
+}
+
 .input-icon input {
   padding-left: 44px;
+  padding-right: 44px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .auth-form input.input-error {

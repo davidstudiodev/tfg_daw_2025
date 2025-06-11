@@ -1,11 +1,24 @@
 <template>
   <div class="logo" @click="goHome" style="cursor:pointer">
-    <img src="/logo_white.svg" alt="Logo" />
+    <img :src="logoSrc" alt="Logo" />
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+
+const props = defineProps({
+  color: {
+    type: String,
+    default: 'white' // 'white' o 'black'
+  }
+})
+
+const logoSrc = computed(() =>
+  props.color === 'black' ? '/logo_black.svg' : '/logo_white.svg'
+)
+
 const router = useRouter()
 function goHome() {
   router.push({ name: 'home' })
