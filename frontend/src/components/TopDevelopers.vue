@@ -14,7 +14,7 @@
             <img v-if="dev.avatar" :src="dev.avatar" class="company-logo" alt="avatar" />
             <span class="company-name">{{ dev.name }}</span>
           </div>
-          <h1 class="offer-title">{{ dev.position || dev.title || 'Desarrollador' }}</h1>
+          <h1 class="offer-title">{{ dev.profession }}</h1>
           <div class="offer-details">
             <div class="detail-row">
               <span class="material-icons-outlined">location_on</span>
