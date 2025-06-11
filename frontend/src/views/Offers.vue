@@ -10,11 +10,8 @@
       <router-link to="/login?role=dev" class="auth-btn">Login</router-link>
       <router-link to="/register?role=dev" class="auth-btn">Register</router-link>
     </div>
-    <div class="offers-header" v-else-if="canApply">
-      <button class="auth-btn" @click="goToProfile">Volver a mi perfil</button>
-    </div>
     <div class="offers-header" v-else-if="isLoggedIn">
-      <button class="auth-btn" @click="goToCompanyProfile">Volver a mi perfil</button>
+      <button class="auth-btn" @click="goToProfile">Volver a mi perfil</button>
     </div>
     <h1>Las mejores empresas en un solo lugar</h1>
     <div class="filters">
@@ -138,25 +135,28 @@ const fetchAppliedOffers = async () => {
 };
 
 // Verifica si el usuario está autenticado y su rol
+const userRole = ref(null);
+
 const checkAuth = async () => {
   try {
     const { data } = await getMe();
     isLoggedIn.value = true;
+    userRole.value = data.role;
     canApply.value = data.role === 'dev';
     if (canApply.value) await fetchAppliedOffers();
   } catch {
     isLoggedIn.value = false;
     canApply.value = false;
     appliedOffers.value = [];
+    userRole.value = null;
   }
 };
 
-const goToProfile = () => {
-  router.push({ name: 'dev-profile' });
-};
 
-const goToCompanyProfile = () => {
-  router.push({ name: 'company-profile' });
+const goToProfile = () => {
+  if (userRole.value === 'dev') router.push({ name: 'dev-profile' });
+  else if (userRole.value === 'company') router.push({ name: 'company-profile' });
+  else if (userRole.value === 'admin') router.push({ name: 'admin-profile' });
 };
 
 // Aplica a una oferta

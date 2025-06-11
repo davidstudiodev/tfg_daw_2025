@@ -205,6 +205,7 @@ watch([filterName, filterProfession, filterLocation], () => {
 function goToProfile() {
   if (userRole.value === 'dev') router.push({ name: 'dev-profile' })
   else if (userRole.value === 'company') router.push({ name: 'company-profile' })
+  else if (userRole.value === 'admin') router.push({ name: 'admin-profile' })
 }
 
 function goToPage(page) {
